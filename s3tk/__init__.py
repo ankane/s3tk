@@ -63,7 +63,7 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
             puts(bucket.name + ' ' + message)
 
     # can't list buckets
-    except botocore.exceptions.ClientError as e:
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
 
 
@@ -101,7 +101,7 @@ def scan(buckets, skip_logging=False, skip_versioning=False):
             sys.exit(1)
 
     # can't list buckets
-    except botocore.exceptions.ClientError as e:
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
 
 
