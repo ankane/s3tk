@@ -124,23 +124,54 @@ def enable_versioning(buckets, dry_run=False):
 @cli.command()
 @click.argument('bucket')
 @click.option('--dry-run', is_flag=True, help='Dry run')
-@click.option('--kms-key-id', help='KMS key ARN')
-def encrypt(bucket, dry_run=False, kms_key_id=None):
+@click.option('--kms-key-id', help='KMS key id')
+@click.option('--customer-key', help='Customer key')
+def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
     bucket = s3.Bucket(bucket)
 
-    encryption = 'aws:kms' if kms_key_id else 'AES256'
+    encryption_type = 'aws:kms' if kms_key_id else 'AES256'
 
-    for obj_summary in bucket.objects.all():
-        obj = obj_summary.Object()
-        if obj.server_side_encryption == encryption:
-            puts(obj.key + ' ' + colored.green('already encrypted'))
-        else:
-            if dry_run:
-                puts(obj.key + ' ' + colored.yellow('to be encrypted'))
+    try:
+        for obj_summary in bucket.objects.all():
+            obj = obj_summary.Object()
+
+            if customer_key:
+                obj.load(SSECustomerAlgorithm='AES256', SSECustomerKey=customer_key)
+
+            encrypted = None
+            if customer_key:
+                encrypted = obj.sse_customer_algorithm is not None
             else:
-                copy_source = {'Bucket': bucket.name, 'Key': obj.key}
-                if kms_key_id:
-                    obj.copy_from(CopySource=copy_source, ServerSideEncryption=encryption, SSEKMSKeyId=kms_key_id)
+                encrypted = obj.server_side_encryption == encryption_type
+
+            if encrypted:
+                puts(obj.key + ' ' + colored.green('already encrypted'))
+            else:
+                if dry_run:
+                    puts(obj.key + ' ' + colored.yellow('to be encrypted'))
                 else:
-                    obj.copy_from(CopySource=copy_source, ServerSideEncryption=encryption)
-                puts(obj.key + ' ' + colored.blue('just encrypted'))
+                    copy_source = {'Bucket': bucket.name, 'Key': obj.key}
+
+                    # TODO support going from customer encryption to other forms
+                    if kms_key_id:
+                        obj.copy_from(
+                            CopySource=copy_source,
+                            ServerSideEncryption='aws:kms',
+                            SSEKMSKeyId=kms_key_id
+                        )
+                    elif customer_key:
+                        obj.copy_from(
+                            CopySource=copy_source,
+                            SSECustomerAlgorithm='AES256',
+                            SSECustomerKey=customer_key
+                        )
+                    else:
+                        obj.copy_from(
+                            CopySource=copy_source,
+                            ServerSideEncryption='AES256'
+                        )
+
+                    puts(obj.key + ' ' + colored.blue('just encrypted'))
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
