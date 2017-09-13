@@ -152,6 +152,20 @@ Here are the policies needed for each command. Only include statements you need.
 
 The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
+## Upgrading
+
+Run:
+
+```sh
+pip install s3tk --upgrade
+```
+
+To use master, run:
+
+```sh
+pip install git+git://github.com/ankane/s3tk.git --upgrade
+```
+
 ## History
 
 View the [changelog](https://github.com/ankane/s3tk/blob/master/CHANGELOG.md)
