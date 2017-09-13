@@ -1,3 +1,7 @@
+## 0.1.3 [unreleased]
+
+- Added `--version` option
+
 ## 0.1.2
 
 - Fixed issue with packaging

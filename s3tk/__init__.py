@@ -68,6 +68,7 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
 
 
 @click.group()
+@click.version_option(version=__version__)
 def cli():
     pass
 
