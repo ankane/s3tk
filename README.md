@@ -88,13 +88,13 @@ Encrypt all objects in a bucket with [server-side encryption](http://docs.aws.am
 s3tk encrypt my-bucket
 ```
 
-Use AES-256 by default. For KMS, use:
+Use [SSE-S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServerSideEncryption.html) by default. For [SSE-KMS](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html), use:
 
 ```sh
 s3tk encrypt my-bucket --kms-key-id arn:aws:kms:...
 ```
 
-For customer-provided encryption keys, use: [master]
+For [SSE-C](http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html), use: [master]
 
 ```sh
 s3tk encrypt my-bucket --customer-key secret-key
@@ -105,7 +105,7 @@ Use the `--dry-run` flag to test
 A few notes about encryption:
 
 - objects will lose any custom ACL
-- we recommend setting a bucket policy to deny unencrypted uploads - docs for [AES-256](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServerSideEncryption.html), [KMS](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html), and not currently possible for customer-provided encryption keys
+- we recommend setting a bucket policy to deny unencrypted uploads - see links above for instructions (currently not possible for SSE-C)
 
 ## Credentials
 
