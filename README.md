@@ -105,7 +105,7 @@ Use the `--dry-run` flag to test
 A few notes about encryption:
 
 - objects will lose any custom ACL
-- we recommend setting a bucket policy to deny unencrypted uploads (this is currently not possible for customer-provided encryption keys)
+- we recommend setting a bucket policy to deny unencrypted uploads - docs for [AES-256](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServerSideEncryption.html), [KMS](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html), and not currently possible for customer-provided encryption keys
 
 ## Credentials
 
