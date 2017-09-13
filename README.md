@@ -8,7 +8,7 @@ A security toolkit for Amazon S3
 
 ## Installation
 
-With pip, run:
+Run:
 
 ```sh
 pip install s3tk
@@ -150,7 +150,7 @@ Here are the policies needed for each command. Only include statements you need.
 
 ## Notes
 
-The `enable-logging` and `enable-versioning` commands are for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
+The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
 ## History
 
