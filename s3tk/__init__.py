@@ -1,5 +1,4 @@
 import sys
-import json
 import os.path
 import boto3
 import botocore
