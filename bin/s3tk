@@ -3,6 +3,6 @@
 import sys
 import s3tk
 try:
-  s3tk.cli()
+    s3tk.cli()
 except KeyboardInterrupt:
-  sys.exit(1)
+    sys.exit(1)
