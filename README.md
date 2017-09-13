@@ -170,8 +170,8 @@ Here are the permissions needed for each command. Only include statements you ne
 
 Keep things simple to reduce the chance of mistakes.
 
-- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`) - use bucket policies instead
-- Avoid mixing objects with different permissions in the same bucket
+- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`). Use bucket policies instead.
+- Keep bucket policies simple. Avoid mixing objects with different permissions in the same bucket.
 
 ## Notes
 
