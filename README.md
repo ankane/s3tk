@@ -166,6 +166,13 @@ Here are the permissions needed for each command. Only include statements you ne
 }
 ```
 
+## Best Practices
+
+Keep things simple to reduce the chance of mistakes.
+
+- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`) - use bucket policies instead
+- Avoid mixing objects with different permissions in the same bucket
+
 ## Notes
 
 The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
