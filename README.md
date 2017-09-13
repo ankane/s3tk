@@ -88,7 +88,7 @@ Encrypt all objects in a bucket with [server-side encryption](http://docs.aws.am
 s3tk encrypt my-bucket
 ```
 
-Use AES-256 by default. For KMS, use
+Use AES-256 by default. For KMS, use:
 
 ```sh
 s3tk encrypt my-bucket --kms-key-id arn:aws:kms:...
@@ -104,7 +104,7 @@ Credentials can be specified in `~/.aws/credentials` or with environment variabl
 
 ## IAM Policies
 
-Here are the policies needed for each command. Only include statements you need.
+Here are the permissions needed for each command. Only include statements you need.
 
 ```json
 {
