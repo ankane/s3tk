@@ -55,9 +55,14 @@ Only on specific buckets
 s3tk enable-logging my-bucket my-bucket-2 --log-bucket my-s3-logs
 ```
 
-Use the `--dry-run` flag to test. This automatically adds a prefix of `%(bucket-name)/`. Buckets with logging already enabled are not updated.
+Use the `--dry-run` flag to test
 
-Also, it can take over an hour for logs to show up.
+A few notes about logging:
+
+- buckets with logging already enabled are not updated at all
+- the log bucket must in the same region as the source bucket - run this command multiple times for different regions
+- the log prefix is set to `%(bucket-name)/`
+- it can take over an hour for logs to show up
 
 ### Enable Versioning
 
