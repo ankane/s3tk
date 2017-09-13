@@ -102,7 +102,10 @@ s3tk encrypt my-bucket --customer-key secret-key
 
 Use the `--dry-run` flag to test
 
-**Note:** Objects will lose any custom ACL
+A few notes about encryption:
+
+- objects will lose any custom ACL
+- we recommend setting a bucket policy to deny unencrypted uploads (this is currently not possible for customer-provided encryption keys)
 
 ## Credentials
 
