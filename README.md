@@ -93,6 +93,10 @@ Use the `--dry-run` flag to test.
 
 **Note:** Objects will lose any custom ACL.
 
+## Credentials
+
+Credentials can be specified in `~/.aws/credentials` or with environment variables.
+
 ## IAM Policies
 
 Here are the policies needed for each command. Only include statements you need.
