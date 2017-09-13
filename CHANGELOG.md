@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Fixed issue with packaging
+
 ## 0.1.1
 
 - Fixed json error

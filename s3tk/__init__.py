@@ -6,7 +6,7 @@ import click
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 s3 = boto3.resource('s3')
 
