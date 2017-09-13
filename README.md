@@ -94,9 +94,9 @@ Use AES-256 by default. For KMS, use
 s3tk encrypt my-bucket --kms-key-id arn:aws:kms:...
 ```
 
-Use the `--dry-run` flag to test.
+Use the `--dry-run` flag to test
 
-**Note:** Objects will lose any custom ACL.
+**Note:** Objects will lose any custom ACL
 
 ## Credentials
 
