@@ -21,10 +21,14 @@ class AclCheck(Check):
     name = 'ACL'
     pass_message = 'not open to public'
     fail_message = 'open to public'
+    bad_grantees = [
+        'http://acs.amazonaws.com/groups/global/AllUsers',
+        'http://acs.amazonaws.com/groups/global/AuthenticatedUsers'
+    ]
 
     def _passed(self):
         for grant in self.bucket.Acl().grants:
-            if 'AllUsers' in str(grant['Grantee']) or 'AuthenticatedUsers' in str(grant['Grantee']):
+            if grant['Grantee'].get('URI', None) in self.bad_grantees:
                 return False
         return True
 
