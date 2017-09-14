@@ -232,6 +232,7 @@ Keep things simple and follow the principle of least privilege to reduce the cha
 - Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`). Use bucket policies instead.
 - Keep bucket policies simple. Avoid mixing objects with different permissions in the same bucket.
 - Strictly limit who can perform bucket-related operations
+- Monitor configuration frequently for changes
 
 ## Notes
 
