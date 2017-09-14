@@ -1,6 +1,7 @@
 ## 0.1.4 [unreleased]
 
 - Added `--log-bucket` and `--log-prefix` options to `scan` command
+- Added `--log-prefix` option to `enable-logging` command
 
 ## 0.1.3
 
