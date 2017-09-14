@@ -63,8 +63,8 @@ class LoggingCheck(Check):
 
     def _passed(self):
         enabled = self.bucket.Logging().logging_enabled
-        log_bucket = self.options['log_bucket']
-        log_prefix = self.options['log_prefix']
+        log_bucket = self.options.get('log_bucket', None)
+        log_prefix = self.options.get('log_prefix', None)
         if log_prefix:
             log_prefix = log_prefix.replace("{bucket}", self.bucket.name)
 
@@ -80,6 +80,8 @@ class LoggingCheck(Check):
         return True
 
     def _fix(self, options):
+        log_prefix = options.get('log_prefix', '{bucket}/').replace("{bucket}", self.bucket.name)
+
         self.bucket.Logging().put(
             BucketLoggingStatus={
                 'LoggingEnabled': {
@@ -100,7 +102,7 @@ class LoggingCheck(Check):
                             'Permission': 'READ_ACP'
                         },
                     ],
-                    'TargetPrefix': self.bucket.name + '/'
+                    'TargetPrefix': log_prefix
                 }
             }
         )

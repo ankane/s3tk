@@ -179,8 +179,9 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 @click.argument('buckets', nargs=-1)
 @click.option('--dry-run', is_flag=True, help='Dry run')
 @click.option('--log-bucket', required=True, help='Bucket to store logs')
-def enable_logging(buckets, log_bucket=None, dry_run=False):
-    fix_check(LoggingCheck, buckets, dry_run, {'log_bucket': log_bucket})
+@click.option('--log-prefix', help='Log prefix')
+def enable_logging(buckets, log_bucket=None, log_prefix=None, dry_run=False):
+    fix_check(LoggingCheck, buckets, dry_run, {'log_bucket': log_bucket, 'log_prefix': log_prefix})
 
 
 @cli.command(name='enable-versioning')

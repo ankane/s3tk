@@ -87,13 +87,18 @@ Only on specific buckets
 s3tk enable-logging my-bucket my-bucket-2 --log-bucket my-s3-logs
 ```
 
+Set log prefix (`{bucket}/` by default) [master]
+
+```sh
+s3tk enable-logging --log-bucket my-s3-logs --log-prefix `logs/{bucket}/`
+```
+
 Use the `--dry-run` flag to test
 
 A few notes about logging:
 
 - buckets with logging already enabled are not updated at all
 - the log bucket must in the same region as the source bucket - run this command multiple times for different regions
-- the log prefix is set to `{bucket}/`
 - it can take over an hour for logs to show up
 
 ### Enable Versioning
