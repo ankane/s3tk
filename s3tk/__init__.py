@@ -46,10 +46,8 @@ def fetch_buckets(buckets):
 
 
 def fix_check(klass, buckets, dry_run, fix_args={}):
-    buckets = fetch_buckets(buckets)
-
     try:
-        for bucket in buckets:
+        for bucket in fetch_buckets(buckets):
             check = klass(bucket)
             check.perform()
 
@@ -85,12 +83,10 @@ def cli():
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
 def scan(buckets, skip_logging=False, skip_versioning=False):
-    buckets = fetch_buckets(buckets)
-
     checks = []
 
     try:
-        for bucket in buckets:
+        for bucket in fetch_buckets(buckets):
             puts(bucket.name)
 
             checks.append(perform(AclCheck(bucket)))
