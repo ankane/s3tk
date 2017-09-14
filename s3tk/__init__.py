@@ -144,9 +144,11 @@ def cli():
 
 @cli.command()
 @click.argument('buckets', nargs=-1)
+@click.option('--log-bucket', multiple=True, help='Check log bucket(s)')
+@click.option('--log-prefix', help='Check log prefix')
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
-def scan(buckets, skip_logging=False, skip_versioning=False):
+def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False):
     checks = []
 
     try:
@@ -158,7 +160,7 @@ def scan(buckets, skip_logging=False, skip_versioning=False):
             checks.append(perform(PolicyCheck(bucket)))
 
             if not skip_logging:
-                checks.append(perform(LoggingCheck(bucket)))
+                checks.append(perform(LoggingCheck(bucket, log_bucket=log_bucket, log_prefix=log_prefix)))
 
             if not skip_versioning:
                 checks.append(perform(VersioningCheck(bucket)))

@@ -3,8 +3,9 @@ import botocore
 
 
 class Check:
-    def __init__(self, bucket):
+    def __init__(self, bucket, **kwargs):
         self.bucket = bucket
+        self.options = kwargs
 
     def perform(self):
         try:
@@ -61,7 +62,22 @@ class LoggingCheck(Check):
     fail_message = 'disabled'
 
     def _passed(self):
-        return self.bucket.Logging().logging_enabled
+        enabled = self.bucket.Logging().logging_enabled
+        log_bucket = self.options['log_bucket']
+        log_prefix = self.options['log_prefix']
+        if log_prefix:
+            log_prefix = log_prefix.replace("{bucket}", self.bucket.name)
+
+        if not enabled:
+            return False
+        elif log_bucket and enabled['TargetBucket'] not in log_bucket:
+            self.fail_message = 'to wrong bucket: ' + enabled['TargetBucket']
+            return False
+        elif log_prefix and enabled['TargetPrefix'] != log_prefix:
+            self.fail_message = 'to wrong prefix: ' + enabled['TargetPrefix']
+            return False
+
+        return True
 
     def _fix(self, options):
         self.bucket.Logging().put(

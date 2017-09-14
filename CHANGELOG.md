@@ -1,3 +1,7 @@
+## 0.1.4 [unreleased]
+
+- Added `--log-bucket` and `--log-prefix` options to `scan` command
+
 ## 0.1.3
 
 - Fixed policy check

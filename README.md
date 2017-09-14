@@ -47,6 +47,12 @@ Also works with wildcards
 s3tk scan "my-bucket*"
 ```
 
+Confirm correct log bucket(s) and prefix [master]
+
+```
+s3tk scan --log-bucket my-s3-logs --log-bucket other-region-logs --log-prefix "{bucket}/"
+```
+
 Skip logging or versioning
 
 ```sh
@@ -87,7 +93,7 @@ A few notes about logging:
 
 - buckets with logging already enabled are not updated at all
 - the log bucket must in the same region as the source bucket - run this command multiple times for different regions
-- the log prefix is set to `%(bucket-name)/`
+- the log prefix is set to `{bucket}/`
 - it can take over an hour for logs to show up
 
 ### Enable Versioning
