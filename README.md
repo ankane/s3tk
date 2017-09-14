@@ -35,6 +35,12 @@ Only run on specific buckets
 s3tk scan my-bucket my-bucket-2
 ```
 
+Also works with wildcards [master]
+
+```sh
+s3tk scan "my-bucket*"
+```
+
 Skip logging or versioning
 
 ```sh

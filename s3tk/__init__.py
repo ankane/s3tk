@@ -1,5 +1,6 @@
 import sys
 import os.path
+import fnmatch
 import boto3
 import botocore
 import click
@@ -35,7 +36,13 @@ def perform(check):
 
 
 def fetch_buckets(buckets):
-    return [s3.Bucket(bn) for bn in buckets] if buckets else s3.buckets.all()
+    if buckets:
+        if any("*" in b for b in buckets):
+            return [b for b in s3.buckets.all() if any(fnmatch.fnmatch(b.name, bn) for bn in buckets)]
+        else:
+            return [s3.Bucket(bn) for bn in buckets]
+    else:
+        return s3.buckets.all()
 
 
 def fix_check(klass, buckets, dry_run, fix_args={}):

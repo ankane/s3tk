@@ -1,5 +1,6 @@
 ## 0.1.3 [unreleased]
 
+- Added support for wildcards
 - Added support for customer-provided encryption key
 - Added `--version` option
 
