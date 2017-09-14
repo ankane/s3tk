@@ -2,6 +2,12 @@
 
 A security toolkit for Amazon S3
 
+> Another day, another leaky Amazon S3 bucket
+>
+> &mdash; The Register, 12 Jul 2017
+
+Don’t be the next [big](https://www.theregister.co.uk/2017/07/12/14m_verizon_customers_details_out/) [data](https://www.theregister.co.uk/2017/08/17/chicago_voter_leak/) [leak](https://www.theregister.co.uk/2017/09/05/twc_loses_4m_customer_records/) [this](https://www.theregister.co.uk/2017/07/18/dow_jones_index_of_customers_not_prices_leaks_from_aws_repo/) [year](https://www.theregister.co.uk/2017/08/22/open_aws_s3_bucket_leaked_hotel_booking_service_data_says_kromtech/)
+
 ![Screenshot](https://gist.githubusercontent.com/ankane/13a9230353c78c0d5c35fd9319a23d98/raw/82889dbc9482246bab8941e6adf8195cbc65e99c/console.gif)
 
 :tangerine: Battle-tested at [Instacart](https://www.instacart.com/opensource)
