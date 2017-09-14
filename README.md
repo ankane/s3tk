@@ -164,6 +164,15 @@ Here are the permissions needed for each command. Only include statements you ne
             "Resource": "*"
         },
         {
+            "Sid": "ListPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketPolicy"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "EnableLogging",
             "Effect": "Allow",
             "Action": [
