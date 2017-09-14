@@ -13,7 +13,8 @@ setup(
     install_requires=[
         'boto3',
         'clint',
-        'click'
+        'click',
+        'joblib'
     ],
     zip_safe=False
 )

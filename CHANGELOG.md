@@ -4,6 +4,7 @@
 - Added support for wildcards
 - Added support for customer-provided encryption key
 - Added `--version` option
+- Parallelize encryption
 
 ## 0.1.2
 

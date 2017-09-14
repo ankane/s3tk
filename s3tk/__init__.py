@@ -5,6 +5,7 @@ import fnmatch
 import boto3
 import botocore
 import click
+from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck
 
@@ -73,6 +74,54 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
         abort(str(e))
 
 
+def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
+    obj = s3.Object(bucket_name, key)
+
+    try:
+        if customer_key:
+            obj.load(SSECustomerAlgorithm='AES256', SSECustomerKey=customer_key)
+
+        encrypted = None
+        if customer_key:
+            encrypted = obj.sse_customer_algorithm is not None
+        elif kms_key_id:
+            encrypted = obj.server_side_encryption == 'aws:kms'
+        else:
+            encrypted = obj.server_side_encryption == 'AES256'
+
+        if encrypted:
+            puts(obj.key + ' ' + colored.green('already encrypted'))
+        else:
+            if dry_run:
+                puts(obj.key + ' ' + colored.yellow('to be encrypted'))
+            else:
+                copy_source = {'Bucket': bucket_name, 'Key': obj.key}
+
+                # TODO support going from customer encryption to other forms
+                if kms_key_id:
+                    obj.copy_from(
+                        CopySource=copy_source,
+                        ServerSideEncryption='aws:kms',
+                        SSEKMSKeyId=kms_key_id
+                    )
+                elif customer_key:
+                    obj.copy_from(
+                        CopySource=copy_source,
+                        SSECustomerAlgorithm='AES256',
+                        SSECustomerKey=customer_key
+                    )
+                else:
+                    obj.copy_from(
+                        CopySource=copy_source,
+                        ServerSideEncryption='AES256'
+                    )
+
+                puts(obj.key + ' ' + colored.blue('just encrypted'))
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        puts(obj.key + ' ' + colored.red(str(e)))
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -134,48 +183,7 @@ def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
     try:
         bucket = s3.Bucket(bucket)
 
-        encryption_type = 'aws:kms' if kms_key_id else 'AES256'
-
-        for obj_summary in bucket.objects.all():
-            obj = obj_summary.Object()
-
-            if customer_key:
-                obj.load(SSECustomerAlgorithm='AES256', SSECustomerKey=customer_key)
-
-            encrypted = None
-            if customer_key:
-                encrypted = obj.sse_customer_algorithm is not None
-            else:
-                encrypted = obj.server_side_encryption == encryption_type
-
-            if encrypted:
-                puts(obj.key + ' ' + colored.green('already encrypted'))
-            else:
-                if dry_run:
-                    puts(obj.key + ' ' + colored.yellow('to be encrypted'))
-                else:
-                    copy_source = {'Bucket': bucket.name, 'Key': obj.key}
-
-                    # TODO support going from customer encryption to other forms
-                    if kms_key_id:
-                        obj.copy_from(
-                            CopySource=copy_source,
-                            ServerSideEncryption='aws:kms',
-                            SSEKMSKeyId=kms_key_id
-                        )
-                    elif customer_key:
-                        obj.copy_from(
-                            CopySource=copy_source,
-                            SSECustomerAlgorithm='AES256',
-                            SSECustomerKey=customer_key
-                        )
-                    else:
-                        obj.copy_from(
-                            CopySource=copy_source,
-                            ServerSideEncryption='AES256'
-                        )
-
-                    puts(obj.key + ' ' + colored.blue('just encrypted'))
+        Parallel(n_jobs=10, backend="threading")(delayed(encrypt_object)(bucket.name, os.key, dry_run, kms_key_id, customer_key) for os in bucket.objects.all())
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
