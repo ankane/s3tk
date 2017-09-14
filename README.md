@@ -168,6 +168,18 @@ Here are the permissions needed for each command. Only include statements you ne
             "Resource": "*"
         },
         {
+            "Sid": "ResetObjectAcl",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::my-bucket",
+                "arn:aws:s3:::my-bucket/*"
+            ]
+        },
+        {
             "Sid": "Encrypt",
             "Effect": "Allow",
             "Action": [
