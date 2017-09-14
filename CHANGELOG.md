@@ -1,5 +1,6 @@
 ## 0.1.3 [unreleased]
 
+- Fixed policy check
 - Added `list-policy` command
 - Added support for wildcards
 - Added support for customer-provided encryption key

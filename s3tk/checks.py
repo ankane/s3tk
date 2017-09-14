@@ -45,7 +45,7 @@ class PolicyCheck(Check):
         if policy is not None:
             policy = json.loads(policy)
             for s in policy['Statement']:
-                if s['Effect'] == 'Allow' and s['Principal'] == '*':
+                if s['Effect'] == 'Allow' and (s['Principal'] == '*' or s['Principal'] == {'AWS': '*'}):
                     return False
 
         return True
