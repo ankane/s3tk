@@ -178,6 +178,22 @@ Keep things simple and follow the principle of least privilege to reduce the cha
 
 The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
+```tf
+resource "aws_s3_bucket" "b" {
+  bucket = "my-bucket"
+  acl    = "private"
+
+  logging {
+    target_bucket = "my-s3-logs"
+    target_prefix = "my-bucket/"
+  }
+
+  versioning {
+    enabled = true
+  }
+}
+```
+
 ## Upgrading
 
 Run:
