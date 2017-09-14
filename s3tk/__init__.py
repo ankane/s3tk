@@ -1,5 +1,6 @@
 import sys
 import os.path
+import json
 import fnmatch
 import boto3
 import botocore
@@ -130,11 +131,11 @@ def enable_versioning(buckets, dry_run=False):
 @click.option('--kms-key-id', help='KMS key id')
 @click.option('--customer-key', help='Customer key')
 def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
-    bucket = s3.Bucket(bucket)
-
-    encryption_type = 'aws:kms' if kms_key_id else 'AES256'
-
     try:
+        bucket = s3.Bucket(bucket)
+
+        encryption_type = 'aws:kms' if kms_key_id else 'AES256'
+
         for obj_summary in bucket.objects.all():
             obj = obj_summary.Object()
 
@@ -175,6 +176,32 @@ def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
                         )
 
                     puts(obj.key + ' ' + colored.blue('just encrypted'))
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
+
+
+@cli.command(name='list-policy')
+@click.argument('buckets', nargs=-1)
+def list_policy(buckets):
+    try:
+        for bucket in fetch_buckets(buckets):
+            puts(bucket.name)
+
+            policy = None
+            try:
+                policy = bucket.Policy().policy
+            except botocore.exceptions.ClientError as e:
+                if 'NoSuchBucket' not in str(e):
+                    raise
+
+            with indent(2):
+                if policy is None:
+                    puts(colored.yellow("None"))
+                else:
+                    puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
+
+            puts()
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
