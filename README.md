@@ -35,7 +35,7 @@ Only run on specific buckets
 s3tk scan my-bucket my-bucket-2
 ```
 
-Also works with wildcards [master]
+Also works with wildcards
 
 ```sh
 s3tk scan "my-bucket*"
@@ -86,7 +86,7 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
-### Reset Object ACL [master]
+### Reset Object ACL
 
 Reset ACL on all objects in a bucket
 
@@ -112,7 +112,7 @@ Use [S3-managed keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServer
 s3tk encrypt my-bucket --kms-key-id arn:aws:kms:...
 ```
 
-For [customer-provided keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html), use: [master]
+For [customer-provided keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html), use:
 
 ```sh
 s3tk encrypt my-bucket --customer-key secret-key

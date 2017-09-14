@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 s3 = boto3.resource('s3')
 
