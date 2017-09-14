@@ -77,6 +77,10 @@ class LoggingCheck(Check):
             self.fail_message = 'to wrong prefix: ' + enabled['TargetPrefix']
             return False
 
+        self.pass_message = 'enabled to ' + enabled['TargetBucket']
+        if enabled['TargetPrefix']:
+            self.pass_message = self.pass_message + '/' + enabled['TargetPrefix']
+
         return True
 
     def _fix(self, options):
