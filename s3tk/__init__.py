@@ -122,6 +122,20 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
         puts(obj.key + ' ' + colored.red(str(e)))
 
 
+def reset_object(bucket_name, key, dry_run):
+    obj = s3.Object(bucket_name, key)
+
+    try:
+        if dry_run:
+            puts(obj.key + ' ' + colored.yellow('ACL to be reset'))
+        else:
+            obj.Acl().put(ACL='private')
+            puts(obj.key + ' ' + colored.blue('ACL reset'))
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        puts(obj.key + ' ' + colored.red(str(e)))
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -184,6 +198,19 @@ def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
         bucket = s3.Bucket(bucket)
 
         Parallel(n_jobs=10, backend="threading")(delayed(encrypt_object)(bucket.name, os.key, dry_run, kms_key_id, customer_key) for os in bucket.objects.all())
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
+
+
+@cli.command(name='reset-object-acl')
+@click.argument('bucket')
+@click.option('--dry-run', is_flag=True, help='Dry run')
+def reset_object_acl(bucket, dry_run=False):
+    try:
+        bucket = s3.Bucket(bucket)
+
+        Parallel(n_jobs=10, backend="threading")(delayed(reset_object)(bucket.name, os.key, dry_run) for os in bucket.objects.all())
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))

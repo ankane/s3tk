@@ -86,6 +86,18 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
+### Reset Object ACL [master]
+
+Reset ACL on all objects in a bucket
+
+```sh
+s3tk reset-object-acl my-bucket
+```
+
+This makes all objects private so you only need to manage bucket permissions (best practice)
+
+Use the `--dry-run` flag to test
+
 ### Encrypt
 
 Encrypt all objects in a bucket with [server-side encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html)
