@@ -47,6 +47,20 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
+### List Policy
+
+List policy for each bucket
+
+```sh
+s3tk list-policy
+```
+
+Only run on specific buckets
+
+```sh
+s3tk list-policy my-bucket my-bucket-2
+```
+
 ### Enable Logging
 
 Enable logging on all buckets
