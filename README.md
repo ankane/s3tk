@@ -49,7 +49,7 @@ s3tk scan --skip-logging --skip-versioning
 
 ### List Policy
 
-List policy for each bucket
+List bucket policies
 
 ```sh
 s3tk list-policy
