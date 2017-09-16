@@ -1,6 +1,7 @@
 ## 0.1.4 [unreleased]
 
 - Added `scan-object-acl` command
+- Added `--only` and `--except` options
 - Added `--log-bucket` and `--log-prefix` options to `scan` command
 - Added `--log-prefix` option to `enable-logging` command
 
