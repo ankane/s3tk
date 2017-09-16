@@ -13,6 +13,37 @@ __version__ = '0.1.3'
 
 s3 = boto3.resource('s3')
 
+canned_acls = [
+    {
+        'acl': 'private',
+        'grants': []
+    },
+    {
+        'acl': 'public-read',
+        'grants': [
+            {'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
+        ]
+    },
+    {
+        'acl': 'public-read-write',
+        'grants': [
+            {'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'},
+            {'Grantee': {u'Type': 'Group', u'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'WRITE'}
+        ]
+    },
+    {
+        'acl': 'authenticated-read',
+        'grants': [
+            {'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AuthenticatedUsers'}, 'Permission': 'READ'}
+        ]
+    },
+    {
+        'acl': 'aws-exec-read',
+        'grants': [
+            {'Grantee': {'Type': 'CanonicalUser', 'DisplayName': 'za-team', 'ID': '6aa5a366c34c1cbe25dc49211496e913e0351eb0e8c37aa3477e40942ec6b97c'}, 'Permission': 'READ'}
+        ]
+    }
+]
 
 def notice(message):
     puts(colored.yellow(message))
@@ -122,6 +153,27 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
         puts(obj.key + ' ' + colored.red(str(e)))
 
 
+def scan_object(bucket_name, key):
+    obj = s3.Object(bucket_name, key)
+
+    try:
+        acl = obj.Acl()
+        owner = acl.owner
+        grants = acl.grants
+        non_owner_grants = [grant for grant in grants if not (grant['Grantee'].get('ID') == owner['ID'] and grant['Permission'] == 'FULL_CONTROL')]
+
+        # TODO bucket-owner-read and bucket-owner-full-control
+        mode = next((ca['acl'] for ca in canned_acls if ca['grants'] == non_owner_grants), 'custom')
+
+        if mode == 'private':
+            puts(obj.key + ' ' + colored.green(mode))
+        else:
+            puts(obj.key + ' ' + colored.yellow(mode))
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        puts(obj.key + ' ' + colored.red(str(e)))
+
+
 def reset_object(bucket_name, key, dry_run):
     obj = s3.Object(bucket_name, key)
 
@@ -201,6 +253,18 @@ def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
         bucket = s3.Bucket(bucket)
 
         Parallel(n_jobs=10, backend="threading")(delayed(encrypt_object)(bucket.name, os.key, dry_run, kms_key_id, customer_key) for os in bucket.objects.all())
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
+
+
+@cli.command(name='scan-object-acl')
+@click.argument('bucket')
+def scan_object_acl(bucket):
+    try:
+        bucket = s3.Bucket(bucket)
+
+        Parallel(n_jobs=10, backend="threading")(delayed(scan_object)(bucket.name, os.key) for os in bucket.objects.all())
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))

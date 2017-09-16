@@ -117,6 +117,14 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
+### Scan Object ACL [master]
+
+Scan ACL on all objects in a bucket
+
+```sh
+s3tk scan-object-acl my-bucket
+```
+
 ### Reset Object ACL
 
 Reset ACL on all objects in a bucket
