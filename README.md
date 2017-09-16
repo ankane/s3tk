@@ -133,7 +133,7 @@ Reset ACL on all objects in a bucket
 s3tk reset-object-acl my-bucket
 ```
 
-This makes all objects private so you only need to manage bucket permissions (best practice)
+This makes all objects private so you only need to manage bucket permissions (best practice). See [bucket policies](#bucket-policies) for how to enforce going forward.
 
 Use the `--dry-run` flag to test
 
@@ -239,6 +239,25 @@ Here are the permissions needed for each command. Only include statements you ne
                 "arn:aws:s3:::my-bucket",
                 "arn:aws:s3:::my-bucket/*"
             ]
+        }
+    ]
+}
+```
+
+## Bucket Policies
+
+Prevent ACL on individual objects
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DenyObjectAcl",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "s3:PutObjectAcl",
+            "Resource": "arn:aws:s3:::my-bucket/*"
         }
     ]
 }
