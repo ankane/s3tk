@@ -70,7 +70,7 @@ def perform(check):
 
 def fetch_buckets(buckets):
     if buckets:
-        if any("*" in b for b in buckets):
+        if any('*' in b for b in buckets):
             return [b for b in s3.buckets.all() if any(fnmatch.fnmatch(b.name, bn) for bn in buckets)]
         else:
             return [s3.Bucket(bn) for bn in buckets]
@@ -203,7 +203,18 @@ def object_matches(key, only, _except):
 def parallelize(bucket, only, _except, fn, args=()):
     try:
         bucket = s3.Bucket(bucket)
-        Parallel(n_jobs=10, backend="threading")(delayed(fn)(bucket.name, os.key, *args) for os in bucket.objects.all() if object_matches(os.key, only, _except))
+
+        # use prefix for performance
+        prefix = None
+        if only:
+            # get the first prefix before wildcard
+            prefix = '/'.join(only.split('*')[0].split('/')[:-1])
+            if prefix:
+                prefix = prefix + '/'
+
+        objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
+
+        Parallel(n_jobs=10, backend='threading')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
 
@@ -307,7 +318,7 @@ def list_policy(buckets):
 
             with indent(2):
                 if policy is None:
-                    puts(colored.yellow("None"))
+                    puts(colored.yellow('None'))
                 else:
                     puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
 
