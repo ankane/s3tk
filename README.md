@@ -125,6 +125,18 @@ Scan ACL on all objects in a bucket
 s3tk scan-object-acl my-bucket
 ```
 
+Only certain objects
+
+```sh
+s3tk scan-object-acl my-bucket --only "*.pdf"
+```
+
+Exclude certain objects
+
+```sh
+s3tk scan-object-acl my-bucket --exclude "*.jpg"
+```
+
 ### Reset Object ACL
 
 Reset ACL on all objects in a bucket

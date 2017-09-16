@@ -188,6 +188,17 @@ def reset_object(bucket_name, key, dry_run):
         puts(obj.key + ' ' + colored.red(str(e)))
 
 
+def object_matches(key, only, exclude):
+    match = True
+
+    if only:
+        match = fnmatch.fnmatch(key, only)
+
+    if exclude and match:
+        match = not fnmatch.fnmatch(key, exclude)
+
+    return match
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -259,12 +270,14 @@ def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
 
 
 @cli.command(name='scan-object-acl')
+@click.option('--only', help='Only certain objects')
+@click.option('--exclude', help='Exclude certain objects')
 @click.argument('bucket')
-def scan_object_acl(bucket):
+def scan_object_acl(bucket, only=None, exclude=None):
     try:
         bucket = s3.Bucket(bucket)
 
-        Parallel(n_jobs=10, backend="threading")(delayed(scan_object)(bucket.name, os.key) for os in bucket.objects.all())
+        Parallel(n_jobs=10, backend="threading")(delayed(scan_object)(bucket.name, os.key) for os in bucket.objects.all() if object_matches(os.key, only, exclude))
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
