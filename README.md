@@ -244,6 +244,15 @@ Here are the permissions needed for each command. Only include statements you ne
 }
 ```
 
+## Best Practices
+
+Keep things simple and follow the principle of least privilege to reduce the chance of mistakes.
+
+- Strictly limit who can perform bucket-related operations
+- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`)
+- Avoid mixing objects with different permissions in the same bucket
+- Monitor configuration frequently for changes
+
 ## Bucket Policies
 
 Prevent ACL on individual objects
@@ -262,15 +271,6 @@ Prevent ACL on individual objects
     ]
 }
 ```
-
-## Best Practices
-
-Keep things simple and follow the principle of least privilege to reduce the chance of mistakes.
-
-- Strictly limit who can perform bucket-related operations
-- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`)
-- Avoid mixing objects with different permissions in the same bucket
-- Monitor configuration frequently for changes
 
 ## Notes
 
