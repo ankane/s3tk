@@ -188,22 +188,22 @@ def reset_object(bucket_name, key, dry_run):
         puts(obj.key + ' ' + colored.red(str(e)))
 
 
-def object_matches(key, only, exclude):
+def object_matches(key, only, _except):
     match = True
 
     if only:
         match = fnmatch.fnmatch(key, only)
 
-    if exclude and match:
-        match = not fnmatch.fnmatch(key, exclude)
+    if _except and match:
+        match = not fnmatch.fnmatch(key, _except)
 
     return match
 
 
-def parallelize(bucket, only, exclude, fn, args=()):
+def parallelize(bucket, only, _except, fn, args=()):
     try:
         bucket = s3.Bucket(bucket)
-        Parallel(n_jobs=10, backend="threading")(delayed(fn)(bucket.name, os.key, *args) for os in bucket.objects.all() if object_matches(os.key, only, exclude))
+        Parallel(n_jobs=10, backend="threading")(delayed(fn)(bucket.name, os.key, *args) for os in bucket.objects.all() if object_matches(os.key, only, _except))
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         abort(str(e))
 
@@ -266,29 +266,29 @@ def enable_versioning(buckets, dry_run=False):
 @cli.command()
 @click.argument('bucket')
 @click.option('--only', help='Only certain objects')
-@click.option('--exclude', help='Exclude certain objects')
+@click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 @click.option('--kms-key-id', help='KMS key id')
 @click.option('--customer-key', help='Customer key')
-def encrypt(bucket, only=None, exclude=None, dry_run=False, kms_key_id=None, customer_key=None):
-    parallelize(bucket, only, exclude, encrypt_object, (dry_run, kms_key_id, customer_key))
+def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, customer_key=None):
+    parallelize(bucket, only, _except, encrypt_object, (dry_run, kms_key_id, customer_key))
 
 
 @cli.command(name='scan-object-acl')
 @click.argument('bucket')
 @click.option('--only', help='Only certain objects')
-@click.option('--exclude', help='Exclude certain objects')
-def scan_object_acl(bucket, only=None, exclude=None):
-    parallelize(bucket, only, exclude, scan_object)
+@click.option('--except', '_except', help='Except certain objects')
+def scan_object_acl(bucket, only=None, _except=None):
+    parallelize(bucket, only, _except, scan_object)
 
 
 @cli.command(name='reset-object-acl')
 @click.argument('bucket')
 @click.option('--only', help='Only certain objects')
-@click.option('--exclude', help='Exclude certain objects')
+@click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
-def reset_object_acl(bucket, only=None, exclude=None, dry_run=False):
-    parallelize(bucket, only, exclude, reset_object, (dry_run,))
+def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
+    parallelize(bucket, only, _except, reset_object, (dry_run,))
 
 
 @cli.command(name='list-policy')

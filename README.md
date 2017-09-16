@@ -131,10 +131,10 @@ Only certain objects
 s3tk scan-object-acl my-bucket --only "*.pdf"
 ```
 
-Exclude certain objects
+Except certain objects
 
 ```sh
-s3tk scan-object-acl my-bucket --exclude "*.jpg"
+s3tk scan-object-acl my-bucket --except "*.jpg"
 ```
 
 ### Reset Object ACL
