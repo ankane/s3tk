@@ -149,6 +149,8 @@ This makes all objects private so you only need to manage bucket permissions (be
 
 Use the `--dry-run` flag to test
 
+Specify certain objects the same way as [scan-object-acl](#scan-object-acl-master)
+
 ### Encrypt
 
 Encrypt all objects in a bucket with [server-side encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html)
@@ -170,6 +172,8 @@ s3tk encrypt my-bucket --customer-key secret-key
 ```
 
 Use the `--dry-run` flag to test
+
+Specify certain objects the same way as [scan-object-acl](#scan-object-acl-master)
 
 A few notes about encryption:
 

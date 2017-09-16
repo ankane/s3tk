@@ -199,6 +199,15 @@ def object_matches(key, only, exclude):
 
     return match
 
+
+def parallelize(bucket, only, exclude, fn, args=()):
+    try:
+        bucket = s3.Bucket(bucket)
+        Parallel(n_jobs=10, backend="threading")(delayed(fn)(bucket.name, os.key, *args) for os in bucket.objects.all() if object_matches(os.key, only, exclude))
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -256,44 +265,30 @@ def enable_versioning(buckets, dry_run=False):
 
 @cli.command()
 @click.argument('bucket')
+@click.option('--only', help='Only certain objects')
+@click.option('--exclude', help='Exclude certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 @click.option('--kms-key-id', help='KMS key id')
 @click.option('--customer-key', help='Customer key')
-def encrypt(bucket, dry_run=False, kms_key_id=None, customer_key=None):
-    try:
-        bucket = s3.Bucket(bucket)
-
-        Parallel(n_jobs=10, backend="threading")(delayed(encrypt_object)(bucket.name, os.key, dry_run, kms_key_id, customer_key) for os in bucket.objects.all())
-
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+def encrypt(bucket, only=None, exclude=None, dry_run=False, kms_key_id=None, customer_key=None):
+    parallelize(bucket, only, exclude, encrypt_object, (dry_run, kms_key_id, customer_key))
 
 
 @cli.command(name='scan-object-acl')
+@click.argument('bucket')
 @click.option('--only', help='Only certain objects')
 @click.option('--exclude', help='Exclude certain objects')
-@click.argument('bucket')
 def scan_object_acl(bucket, only=None, exclude=None):
-    try:
-        bucket = s3.Bucket(bucket)
-
-        Parallel(n_jobs=10, backend="threading")(delayed(scan_object)(bucket.name, os.key) for os in bucket.objects.all() if object_matches(os.key, only, exclude))
-
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+    parallelize(bucket, only, exclude, scan_object)
 
 
 @cli.command(name='reset-object-acl')
 @click.argument('bucket')
+@click.option('--only', help='Only certain objects')
+@click.option('--exclude', help='Exclude certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
-def reset_object_acl(bucket, dry_run=False):
-    try:
-        bucket = s3.Bucket(bucket)
-
-        Parallel(n_jobs=10, backend="threading")(delayed(reset_object)(bucket.name, os.key, dry_run) for os in bucket.objects.all())
-
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+def reset_object_acl(bucket, only=None, exclude=None, dry_run=False):
+    parallelize(bucket, only, exclude, reset_object, (dry_run,))
 
 
 @cli.command(name='list-policy')
