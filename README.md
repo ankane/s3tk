@@ -296,7 +296,7 @@ WITH SERDEPROPERTIES (
 ) LOCATION 's3://my-s3-logs/my-bucket/';
 ```
 
-Be sure the change the last line to point to your log bucket and prefix, and query away
+Change the last line to point to your log bucket and prefix, and query away
 
 ```sql
 SELECT
