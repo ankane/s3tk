@@ -47,7 +47,7 @@ Also works with wildcards
 s3tk scan "my-bucket*"
 ```
 
-Confirm correct log bucket(s) and prefix [master]
+Confirm correct log bucket(s) and prefix
 
 ```
 s3tk scan --log-bucket my-s3-logs --log-bucket other-region-logs --log-prefix "{bucket}/"
@@ -87,7 +87,7 @@ Only on specific buckets
 s3tk enable-logging my-bucket my-bucket-2 --log-bucket my-s3-logs
 ```
 
-Set log prefix (`{bucket}/` by default) [master]
+Set log prefix (`{bucket}/` by default)
 
 ```sh
 s3tk enable-logging --log-bucket my-s3-logs --log-prefix `logs/{bucket}/`
@@ -117,7 +117,7 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
-### Scan Object ACL [master]
+### Scan Object ACL
 
 Scan ACL on all objects in a bucket
 
@@ -149,7 +149,7 @@ This makes all objects private so you only need to manage bucket permissions (be
 
 Use the `--dry-run` flag to test
 
-Specify certain objects the same way as [scan-object-acl](#scan-object-acl-master)
+Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 
 ### Encrypt
 
@@ -173,7 +173,7 @@ s3tk encrypt my-bucket --customer-key secret-key
 
 Use the `--dry-run` flag to test
 
-Specify certain objects the same way as [scan-object-acl](#scan-object-acl-master)
+Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 
 A few notes about encryption:
 
