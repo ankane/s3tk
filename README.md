@@ -90,7 +90,7 @@ s3tk enable-logging my-bucket my-bucket-2 --log-bucket my-s3-logs
 Set log prefix (`{bucket}/` by default)
 
 ```sh
-s3tk enable-logging --log-bucket my-s3-logs --log-prefix `logs/{bucket}/`
+s3tk enable-logging --log-bucket my-s3-logs --log-prefix "logs/{bucket}/"
 ```
 
 Use the `--dry-run` flag to test
