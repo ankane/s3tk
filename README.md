@@ -309,7 +309,6 @@ FROM
 WHERE
     requester = '-'
     AND status_code LIKE '2%'
-    AND bucket = 'my-bucket'
     AND request_url LIKE '/some-keys%'
 ORDER BY 1
 ```
