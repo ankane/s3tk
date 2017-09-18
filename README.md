@@ -260,6 +260,62 @@ Here are the permissions needed for each command. Only include statements you ne
 }
 ```
 
+## Access Logs
+
+To query S3 access logs, we recommend [Amazon Athena](https://aws.amazon.com/athena/).
+
+Thankfully, [this post](http://aws.mannem.me/?p=1462) makes this easy. Create a table with:
+
+```sql
+CREATE EXTERNAL TABLE my_bucket (
+    bucket_owner string,
+    bucket string,
+    timestamp string,
+    remote_ip string,
+    requester string,
+    request_id string,
+    operation string,
+    key string,
+    request_verb string,
+    request_url string,
+    request_proto string,
+    status_code string,
+    error_code string,
+    bytes_sent string,
+    object_size string,
+    total_time string,
+    turn_around_time string,
+    referrer string,
+    user_agent string,
+    version_id string
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+    'serialization.format' = '1',
+    'input.regex' = '([^ ]*) ([^ ]*) \\[(.*?)\\] ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) \\\"([^ ]*) ([^ ]*) (- |[^ ]*)\\\" (-|[0-9]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) (\"[^\"]*\\") ([^ ]*)$'
+) LOCATION 's3://my-s3-logs/my-bucket/';
+```
+
+**Note:** Be sure the change the last line to point to your log bucket and prefix.
+
+And query away
+
+```sql
+SELECT
+    date_parse(timestamp, '%d/%b/%Y:%H:%i:%S +0000') AS timestamp,
+    request_url,
+    remote_ip,
+    user_agent
+FROM
+    my_bucket
+WHERE
+    requester = '-'
+    AND status_code LIKE '2%'
+    AND bucket = 'my-bucket'
+    AND request_url LIKE '/some-keys%'
+ORDER BY 1
+```
+
 ## Best Practices
 
 Keep things simple and follow the principle of least privilege to reduce the chance of mistakes.
