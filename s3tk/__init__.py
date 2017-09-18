@@ -2,16 +2,19 @@ import sys
 import os.path
 import json
 import fnmatch
+from datetime import datetime
+from time import sleep
 import boto3
 import botocore
 import click
 from joblib import Parallel, delayed
-from clint.textui import colored, puts, indent
+from clint.textui import colored, puts, puts_err, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck
 
 __version__ = '0.1.4'
 
 s3 = boto3.resource('s3')
+athena = boto3.client('athena')
 
 canned_acls = [
     {
@@ -219,6 +222,122 @@ def parallelize(bucket, only, _except, fn, args=()):
         abort(str(e))
 
 
+def get_results(execution_id, print_id=True):
+    wait_for_query(execution_id, print_id)
+
+    first_page = True
+    paginator = athena.get_paginator('get_query_results')
+    for page in paginator.paginate(QueryExecutionId=execution_id):
+        rows = page['ResultSet']['Rows']
+        if first_page:
+            rows = rows[1:]
+            first_page = False
+
+        for row in rows:
+            data = [d['VarCharValue'] for d in row['Data']]
+            time = datetime.strptime(data[0], '%Y-%m-%d %H:%M:%S.000')
+            puts(time.isoformat() + ' ' + data[1][1:] + ' ' + data[2] + ' ' + data[3][1:-1])
+
+
+def create_table(table_name, target_bucket, target_prefix):
+    s = """
+CREATE EXTERNAL TABLE IF NOT EXISTS %s (
+    bucket_owner string,
+    bucket string,
+    time string,
+    remote_ip string,
+    requester string,
+    request_id string,
+    operation string,
+    key string,
+    request_verb string,
+    request_url string,
+    request_proto string,
+    status_code string,
+    error_code string,
+    bytes_sent string,
+    object_size string,
+    total_time string,
+    turn_around_time string,
+    referrer string,
+    user_agent string,
+    version_id string)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+    'serialization.format' = '1',
+    'input.regex' = '([^ ]*) ([^ ]*) \\\\[(.*?)\\\\] ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) \\\\\\"([^ ]*) ([^ ]*) (- |[^ ]*)\\\\\\" (-|[0-9]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) (\\"[^\\"]*\\") ([^ ]*)$'
+) LOCATION 's3://%s/%s';
+            """ % (table_name, target_bucket, target_prefix)
+
+    response = athena.start_query_execution(
+        QueryString=s,
+        ResultConfiguration={
+            'OutputLocation': output_location,
+        }
+    )
+    wait_for_query(response['QueryExecutionId'])
+
+
+def wait_for_query(execution_id, print_id=False):
+    # wait
+    tries = 0
+
+    while tries < 1000:
+        try:
+            athena.get_query_results(QueryExecutionId=execution_id)
+            break
+        except botocore.exceptions.ClientError as e:
+            if 'Query has not yet finished.' in str(e):
+                if print_id and tries == 2:
+                    print_execution_message(execution_id)
+                    print_id = False
+
+                sleep(1)
+                tries += 1
+            else:
+                raise
+
+    if print_id:
+        print_execution_message(execution_id)
+
+
+def print_execution_message(execution_id):
+    puts_err(colored.yellow('Executing query... if you get disconnected, fetch results with:'))
+    puts_err(colored.yellow('s3tk log-results ' + execution_id))
+
+
+def run_query(table_name, bucket, output_location, only):
+    where = ''
+    if only:
+        where = """\n    AND request_url LIKE '/%s'""" % (only.replace("*", "%"))
+
+    s = """
+SELECT
+    date_parse(time, '%d/%b/%Y:%H:%i:%S +0000') AS time,
+    request_url,
+    remote_ip,
+    user_agent
+FROM
+    {}
+WHERE
+    requester = '-'
+    AND status_code LIKE '2%'
+    AND bucket = '{}'{}
+ORDER BY 1
+    """.format(table_name, bucket, where)
+
+    response = athena.start_query_execution(
+        QueryString=s,
+        ResultConfiguration={
+            'OutputLocation': output_location,
+        }
+    )
+
+    execution_id = response['QueryExecutionId']
+
+    get_results(execution_id)
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -300,6 +419,42 @@ def scan_object_acl(bucket, only=None, _except=None):
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
     parallelize(bucket, only, _except, reset_object, (dry_run,))
+
+
+@cli.command(name='access-logs')
+@click.argument('bucket')
+@click.option('--output-location', required=True, help='S3 bucket where results are stored')
+@click.option('--only', help='Only certain objects')
+def access_logs(bucket, output_location=None, only=None):
+    try:
+        # TODO handle collisions
+        table_name = 's3tk_' + bucket.replace('-', '_').replace('.', '_')
+
+        # try run query first
+        try:
+            run_query(table_name, bucket, output_location, only)
+        except:
+            # get bucket info
+            bucket = s3.Bucket(bucket)
+            logging = bucket.Logging().logging_enabled
+
+            if not logging:
+                abort('Logging not enabled')
+
+            create_table(table_name, logging['TargetBucket'], logging['TargetPrefix'])
+            run_query(table_name, bucket.name, output_location, only)
+
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
+
+
+@cli.command(name='log-results')
+@click.argument('execution_id')
+def log_results(execution_id):
+    try:
+        get_results(execution_id)
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        abort(str(e))
 
 
 @cli.command(name='list-policy')

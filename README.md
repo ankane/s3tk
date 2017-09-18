@@ -180,6 +180,20 @@ A few notes about encryption:
 - objects will lose any custom ACL
 - we recommend setting a bucket policy to deny unencrypted uploads - see links above for instructions (currently not possible for customer-provided keys)
 
+## Access Logs
+
+Get public access logs. Uses [Amazon Athena](https://aws.amazon.com/athena/) to run queries.
+
+```sh
+s3tk access-logs my-bucket --output-location s3://my-athena-bucket/
+```
+
+Only certain objects
+
+```sh
+s3tk access-logs my-bucket --only "path/*.jpg"
+```
+
 ## Credentials
 
 Credentials can be specified in `~/.aws/credentials` or with environment variables.
