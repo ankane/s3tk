@@ -262,9 +262,9 @@ Here are the permissions needed for each command. Only include statements you ne
 
 ## Access Logs
 
-To query S3 access logs, we recommend [Amazon Athena](https://aws.amazon.com/athena/).
+We recommend [Amazon Athena](https://aws.amazon.com/athena/) for querying S3 logs. [This post](http://aws.mannem.me/?p=1462) makes this easy.
 
-Thankfully, [this post](http://aws.mannem.me/?p=1462) makes this easy. Create a table with:
+Create a table with:
 
 ```sql
 CREATE EXTERNAL TABLE my_bucket (
@@ -296,7 +296,7 @@ WITH SERDEPROPERTIES (
 ) LOCATION 's3://my-s3-logs/my-bucket/';
 ```
 
-Change the last line to point to your log bucket and prefix, and query away
+Change the last line to point to your log bucket (and prefix) and query away
 
 ```sql
 SELECT
@@ -310,6 +310,79 @@ WHERE
     requester = '-'
     AND status_code LIKE '2%'
     AND request_url LIKE '/some-keys%'
+ORDER BY 1
+```
+
+## CloudTrail Logs
+
+We also recommend Amazon Athena for querying bucket events in CloudTrail logs. [This post](http://www.1strategy.com/blog/2017/07/25/auditing-aws-activity-with-cloudtrail-and-athena/) makes this easy.
+
+Create a table with:
+
+```sql
+CREATE EXTERNAL TABLE cloudtrail_logs (
+    eventversion STRING,
+    userIdentity STRUCT<
+        type:STRING,
+        principalid:STRING,
+        arn:STRING,
+        accountid:STRING,
+        invokedby:STRING,
+        accesskeyid:STRING,
+        userName:String,
+        sessioncontext:STRUCT<
+            attributes:STRUCT<
+                mfaauthenticated:STRING,
+                creationdate:STRING>,
+            sessionIssuer:STRUCT<
+                type:STRING,
+                principalId:STRING,
+                arn:STRING,
+                accountId:STRING,
+                userName:STRING>>>,
+    eventTime STRING,
+    eventSource STRING,
+    eventName STRING,
+    awsRegion STRING,
+    sourceIpAddress STRING,
+    userAgent STRING,
+    errorCode STRING,
+    errorMessage STRING,
+    requestId  STRING,
+    eventId  STRING,
+    resources ARRAY<STRUCT<
+        ARN:STRING,
+        accountId:STRING,
+        type:STRING>>,
+    eventType STRING,
+    apiVersion  STRING,
+    readOnly BOOLEAN,
+    recipientAccountId STRING,
+    sharedEventID STRING,
+    vpcEndpointId STRING,
+    requestParameters STRING,
+    responseElements STRING,
+    additionalEventData STRING,
+    serviceEventDetails STRING
+)
+ROW FORMAT SERDE 'com.amazon.emr.hive.serde.CloudTrailSerde'
+STORED  AS INPUTFORMAT 'com.amazon.emr.cloudtrail.CloudTrailInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION  's3://my-cloudtrail-logs/'
+```
+
+Change the last line to point to your CloudTrail log bucket and query away
+
+```sql
+SELECT
+    eventTime,
+    eventName,
+    userIdentity.userName,
+    requestParameters
+FROM
+    cloudtrail_logs
+WHERE
+    eventName LIKE '%Bucket%'
 ORDER BY 1
 ```
 
@@ -346,7 +419,7 @@ Prevent ACL on individual objects
 The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
 ```tf
-resource "aws_s3_bucket" "b" {
+resource "aws_s3_bucket" "my_bucket" {
   bucket = "my-bucket"
   acl    = "private"
 
