@@ -208,7 +208,7 @@ def parallelize(bucket, only, _except, fn, args=()):
 
     objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
-    Parallel(n_jobs=10, backend='threading')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+    Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 @click.group()

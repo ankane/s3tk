@@ -1,3 +1,7 @@
+## 0.1.6 [unreleased]
+
+- 2x performance for object commands
+
 ## 0.1.5
 
 - Fixed error with `enable-logging`
