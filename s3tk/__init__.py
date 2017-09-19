@@ -79,30 +79,25 @@ def fetch_buckets(buckets):
 
 
 def fix_check(klass, buckets, dry_run, fix_args={}):
-    try:
-        for bucket in fetch_buckets(buckets):
-            check = klass(bucket)
-            check.perform()
+    for bucket in fetch_buckets(buckets):
+        check = klass(bucket)
+        check.perform()
 
-            if check.status == 'passed':
-                message = colored.green('already enabled')
-            elif check.status == 'denied':
-                message = colored.red('access denied')
+        if check.status == 'passed':
+            message = colored.green('already enabled')
+        elif check.status == 'denied':
+            message = colored.red('access denied')
+        else:
+            if dry_run:
+                message = colored.yellow('to be enabled')
             else:
-                if dry_run:
-                    message = colored.yellow('to be enabled')
-                else:
-                    try:
-                        check.fix(fix_args)
-                        message = colored.blue('just enabled')
-                    except botocore.exceptions.ClientError as e:
-                        message = colored.red(str(e))
+                try:
+                    check.fix(fix_args)
+                    message = colored.blue('just enabled')
+                except botocore.exceptions.ClientError as e:
+                    message = colored.red(str(e))
 
-            puts(bucket.name + ' ' + message)
-
-    # can't list buckets
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+        puts(bucket.name + ' ' + message)
 
 
 def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
@@ -201,22 +196,19 @@ def object_matches(key, only, _except):
 
 
 def parallelize(bucket, only, _except, fn, args=()):
-    try:
-        bucket = s3.Bucket(bucket)
+    bucket = s3.Bucket(bucket)
 
-        # use prefix for performance
-        prefix = None
-        if only:
-            # get the first prefix before wildcard
-            prefix = '/'.join(only.split('*')[0].split('/')[:-1])
-            if prefix:
-                prefix = prefix + '/'
+    # use prefix for performance
+    prefix = None
+    if only:
+        # get the first prefix before wildcard
+        prefix = '/'.join(only.split('*')[0].split('/')[:-1])
+        if prefix:
+            prefix = prefix + '/'
 
-        objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
+    objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
-        Parallel(n_jobs=10, backend='threading')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+    Parallel(n_jobs=10, backend='threading')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 @click.group()
@@ -233,29 +225,23 @@ def cli():
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
 def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False):
     checks = []
+    for bucket in fetch_buckets(buckets):
+        puts(bucket.name)
 
-    try:
-        for bucket in fetch_buckets(buckets):
-            puts(bucket.name)
+        checks.append(perform(AclCheck(bucket)))
 
-            checks.append(perform(AclCheck(bucket)))
+        checks.append(perform(PolicyCheck(bucket)))
 
-            checks.append(perform(PolicyCheck(bucket)))
+        if not skip_logging:
+            checks.append(perform(LoggingCheck(bucket, log_bucket=log_bucket, log_prefix=log_prefix)))
 
-            if not skip_logging:
-                checks.append(perform(LoggingCheck(bucket, log_bucket=log_bucket, log_prefix=log_prefix)))
+        if not skip_versioning:
+            checks.append(perform(VersioningCheck(bucket)))
 
-            if not skip_versioning:
-                checks.append(perform(VersioningCheck(bucket)))
+        puts()
 
-            puts()
-
-        if sum(1 for c in checks if c.status != 'passed') > 0:
-            sys.exit(1)
-
-    # can't list buckets
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+    if sum(1 for c in checks if c.status != 'passed') > 0:
+        sys.exit(1)
 
 
 @cli.command(name='enable-logging')
@@ -305,24 +291,20 @@ def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
 @cli.command(name='list-policy')
 @click.argument('buckets', nargs=-1)
 def list_policy(buckets):
-    try:
-        for bucket in fetch_buckets(buckets):
-            puts(bucket.name)
+    for bucket in fetch_buckets(buckets):
+        puts(bucket.name)
 
-            policy = None
-            try:
-                policy = bucket.Policy().policy
-            except botocore.exceptions.ClientError as e:
-                if 'NoSuchBucket' not in str(e):
-                    raise
+        policy = None
+        try:
+            policy = bucket.Policy().policy
+        except botocore.exceptions.ClientError as e:
+            if 'NoSuchBucket' not in str(e):
+                raise
 
-            with indent(2):
-                if policy is None:
-                    puts(colored.yellow('None'))
-                else:
-                    puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
+        with indent(2):
+            if policy is None:
+                puts(colored.yellow('None'))
+            else:
+                puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
 
-            puts()
-
-    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        abort(str(e))
+        puts()

@@ -2,7 +2,10 @@
 
 import sys
 import s3tk
+import botocore
 try:
     s3tk.cli()
+except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+    s3tk.abort(str(e))
 except KeyboardInterrupt:
     sys.exit(1)
