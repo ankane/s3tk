@@ -84,7 +84,7 @@ class LoggingCheck(Check):
         return True
 
     def _fix(self, options):
-        log_prefix = options.get('log_prefix', '{bucket}/').replace("{bucket}", self.bucket.name)
+        log_prefix = (options['log_prefix'] or '{bucket}/').replace("{bucket}", self.bucket.name)
 
         self.bucket.Logging().put(
             BucketLoggingStatus={

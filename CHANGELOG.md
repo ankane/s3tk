@@ -1,3 +1,7 @@
+## 0.1.5 [unreleased]
+
+- Fixed error with `enable-logging`
+
 ## 0.1.4
 
 - Added `scan-object-acl` command
