@@ -178,7 +178,7 @@ Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 A few notes about encryption:
 
 - objects will lose any custom ACL
-- we recommend setting a bucket policy to deny unencrypted uploads - see links above for instructions (currently not possible for customer-provided keys)
+- we recommend setting a bucket policy to deny unencrypted uploads - see [Bucket Policies section] for instructions
 
 ## Credentials
 
@@ -404,7 +404,6 @@ Prevent ACL on individual objects
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "DenyObjectAcl",
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObjectAcl",
@@ -413,6 +412,31 @@ Prevent ACL on individual objects
     ]
 }
 ```
+
+Prevent unencrypted uploads (S3-managed keys)
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::my-bucket/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:x-amz-server-side-encryption": "AES256"
+        }
+      }
+    }
+  ]
+}
+```
+
+For KMS-managed keys, replace `AES256` with `aws:kms` above.
+
+There is currently no way to do this with customer-provided keys.
 
 ## Notes
 
