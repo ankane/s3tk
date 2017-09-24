@@ -264,8 +264,6 @@ Here are the permissions needed for each command. Only include statements you ne
 
 We recommend [Amazon Athena](https://aws.amazon.com/athena/) for querying S3 logs. Create a table (thanks to [this post](http://aws.mannem.me/?p=1462) for the table structure) with:
 
-Create a table with:
-
 ```sql
 CREATE EXTERNAL TABLE my_bucket (
     bucket_owner string,
@@ -316,8 +314,6 @@ ORDER BY 1
 ## CloudTrail Logs
 
 We also recommend Amazon Athena for querying CloudTrail logs. Create a table (thanks to [this post](http://www.1strategy.com/blog/2017/07/25/auditing-aws-activity-with-cloudtrail-and-athena/) for the table structure) with:
-
-Create a table with:
 
 ```sql
 CREATE EXTERNAL TABLE cloudtrail_logs (
