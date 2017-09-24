@@ -262,7 +262,7 @@ Here are the permissions needed for each command. Only include statements you ne
 
 ## Access Logs
 
-We recommend [Amazon Athena](https://aws.amazon.com/athena/) for querying S3 logs. [This post](http://aws.mannem.me/?p=1462) makes this easy.
+We recommend [Amazon Athena](https://aws.amazon.com/athena/) for querying S3 logs. Create a table (thanks to [this post](http://aws.mannem.me/?p=1462) for the table structure) with:
 
 Create a table with:
 
@@ -315,7 +315,7 @@ ORDER BY 1
 
 ## CloudTrail Logs
 
-We also recommend Amazon Athena for querying bucket events in CloudTrail logs. [This post](http://www.1strategy.com/blog/2017/07/25/auditing-aws-activity-with-cloudtrail-and-athena/) makes this easy.
+We also recommend Amazon Athena for querying CloudTrail logs. Create a table (thanks to [this post](http://www.1strategy.com/blog/2017/07/25/auditing-aws-activity-with-cloudtrail-and-athena/) for the table structure) with:
 
 Create a table with:
 
