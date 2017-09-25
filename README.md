@@ -268,7 +268,7 @@ Here are the permissions needed for each command. Only include statements you ne
 CREATE EXTERNAL TABLE my_bucket (
     bucket_owner string,
     bucket string,
-    timestamp string,
+    time string,
     remote_ip string,
     requester string,
     request_id string,
@@ -298,7 +298,7 @@ Change the last line to point to your log bucket (and prefix) and query away
 
 ```sql
 SELECT
-    date_parse(timestamp, '%d/%b/%Y:%H:%i:%S +0000') AS timestamp,
+    date_parse(time, '%d/%b/%Y:%H:%i:%S +0000') AS time,
     request_url,
     remote_ip,
     user_agent
