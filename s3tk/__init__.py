@@ -354,7 +354,7 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
         })
 
     if any(statements):
-        puts(bucket.name + ' new policy')
+        puts('New policy')
         policy = {
             'Version': '2012-10-17',
             'Statement': statements
@@ -363,11 +363,11 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
         with indent(2):
             puts(colored.yellow(json.dumps(policy, indent=4)))
     else:
-        abort("No policies specified")
+        abort('No policies specified')
 
 
 @cli.command(name='delete-policy')
 @click.argument('bucket')
 def delete_policy(bucket):
     s3.Bucket(bucket).Policy().delete()
-    puts(bucket + ' policy deleted')
+    puts('Policy deleted')
