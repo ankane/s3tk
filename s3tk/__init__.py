@@ -352,10 +352,10 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
 
     if any(statements):
         puts('New policy')
-        policy = {
-            'Version': '2012-10-17',
-            'Statement': statements
-        }
+        policy = OrderedDict([
+            ('Version', '2012-10-17'),
+            ('Statement', statements)
+        ])
         with indent(2):
             puts(colored.yellow(json.dumps(policy, indent=4)))
         bucket_policy.put(Policy=json.dumps(policy))
