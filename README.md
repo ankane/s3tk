@@ -73,6 +73,12 @@ Only run on specific buckets
 s3tk list-policy my-bucket my-bucket-2
 ```
 
+### Update Policy [master]
+
+```sh
+s3tk update-policy --public --no-object-acl --encryption
+```
+
 ### Enable Logging
 
 Enable logging on all buckets
@@ -210,6 +216,15 @@ Here are the permissions needed for each command. Only include statements you ne
             "Action": [
                 "s3:ListAllMyBuckets",
                 "s3:GetBucketPolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "UpdatePolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutBucketPolicy",
+                "s3:DeleteBucketPolicy"
             ],
             "Resource": "*"
         },

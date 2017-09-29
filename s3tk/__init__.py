@@ -308,3 +308,56 @@ def list_policy(buckets):
                 puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
 
         puts()
+
+
+@cli.command(name='update-policy')
+@click.argument('bucket')
+@click.option('--public', is_flag=True, help='Make all objects public')
+@click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
+@click.option('--encryption', is_flag=True, help='Require encryption')
+def update_policy(bucket, public=False, no_object_acl=False, encryption=False):
+    bucket = s3.Bucket(bucket)
+    bucket_policy = bucket.Policy()
+
+    statements = []
+
+    if public:
+        statements.append({
+            'Sid': 'Public',
+            'Effect': 'Allow',
+            'Principal': '*',
+            'Action': ['s3:GetObject'],
+            'Resource': "arn:aws:s3:::%s/*" % bucket.name
+        })
+
+    if no_object_acl:
+        statements.append({
+            'Sid': 'NoObjectAcl',
+            'Effect': 'Deny',
+            'Principal': '*',
+            'Action': ['s3:PutObjectAcl'],
+            'Resource': "arn:aws:s3:::%s/*" % bucket.name
+        })
+
+    if encryption:
+        statements.append({
+            'Sid': 'Encryption',
+            'Effect': 'Deny',
+            'Principal': '*',
+            'Action': ['s3:PutObject'],
+            'Resource': "arn:aws:s3:::%s/*" % bucket.name,
+            'Condition': {
+                'StringNotEquals': {
+                  's3:x-amz-server-side-encryption': 'AES256'
+                }
+            }
+        })
+
+    if any(statements):
+        policy = {
+            'Version': '2012-10-17',
+            'Statement': statements
+        }
+        bucket_policy.put(Policy=json.dumps(policy))
+    else:
+        bucket_policy.delete()
