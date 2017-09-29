@@ -73,30 +73,32 @@ Only run on specific buckets
 s3tk list-policy my-bucket my-bucket-2
 ```
 
-### Replace Policy [master]
+### Set Policy [master]
+
+**Note:** This replaces the previous policy
 
 Prevent object ACL
 
 ```sh
-s3tk replace-policy my-bucket --no-object-acl
+s3tk set-policy my-bucket --no-object-acl
 ```
 
 Require encryption
 
 ```sh
-s3tk replace-policy my-bucket --encryption
+s3tk set-policy my-bucket --encryption
 ```
 
 Make all objects public
 
 ```sh
-s3tk replace-policy my-bucket --public
+s3tk set-policy my-bucket --public
 ```
 
 Use multiple together
 
 ```sh
-s3tk replace-policy my-bucket --no-object-acl --encryption --public
+s3tk set-policy my-bucket --no-object-acl --encryption --public
 ```
 
 ### Delete Policy [master]
@@ -248,7 +250,7 @@ Here are the permissions needed for each command. Only include statements you ne
             "Resource": "*"
         },
         {
-            "Sid": "ReplacePolicy",
+            "Sid": "SetPolicy",
             "Effect": "Allow",
             "Action": [
                 "s3:PutBucketPolicy"
