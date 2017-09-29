@@ -354,12 +354,14 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
         })
 
     if any(statements):
+        puts(bucket.name + ' new policy')
         policy = {
             'Version': '2012-10-17',
             'Statement': statements
         }
         bucket_policy.put(Policy=json.dumps(policy))
-        puts(colored.green("Policy updated"))
+        with indent(2):
+            puts(colored.yellow(json.dumps(policy, indent=4)))
     else:
         abort("No policies specified")
 
@@ -368,4 +370,4 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
 @click.argument('bucket')
 def delete_policy(bucket):
     s3.Bucket(bucket).Policy().delete()
-    puts(colored.green("Policy deleted"))
+    puts(bucket + ' policy deleted')
