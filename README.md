@@ -75,13 +75,7 @@ s3tk list-policy my-bucket my-bucket-2
 
 ### Update Policy [master]
 
-Make public
-
-```sh
-s3tk update-policy my-bucket --public
-```
-
-**Note:** This replaces the existing bucket policy
+**Note:** This command replaces the existing bucket policy
 
 Prevent object ACL
 
@@ -95,10 +89,16 @@ Require encryption
 s3tk update-policy my-bucket --encryption
 ```
 
+Make public
+
+```sh
+s3tk update-policy my-bucket --public
+```
+
 Use many together
 
 ```sh
-s3tk update-policy my-bucket --public --no-object-acl --encryption
+s3tk update-policy my-bucket --no-object-acl --encryption --public
 ```
 
 ### Delete Policy [master]
