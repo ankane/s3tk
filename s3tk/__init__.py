@@ -310,12 +310,12 @@ def list_policy(buckets):
         puts()
 
 
-@cli.command(name='update-policy')
+@cli.command(name='replace-policy')
 @click.argument('bucket')
 @click.option('--public', is_flag=True, help='Make all objects public')
 @click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
 @click.option('--encryption', is_flag=True, help='Require encryption')
-def update_policy(bucket, public=False, no_object_acl=False, encryption=False):
+def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
     bucket = s3.Bucket(bucket)
     bucket_policy = bucket.Policy()
 
