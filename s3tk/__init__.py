@@ -306,7 +306,7 @@ def list_policy(buckets):
             if policy is None:
                 puts(colored.yellow('None'))
             else:
-                puts(colored.yellow(json.dumps(json.loads(policy), indent=4)))
+                puts(colored.yellow(json.dumps(json.loads(policy, object_pairs_hook=OrderedDict), indent=4)))
 
         puts()
 
