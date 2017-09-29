@@ -359,5 +359,13 @@ def update_policy(bucket, public=False, no_object_acl=False, encryption=False):
             'Statement': statements
         }
         bucket_policy.put(Policy=json.dumps(policy))
+        puts(colored.green("Policy updated"))
     else:
-        bucket_policy.delete()
+        abort("No policies specified")
+
+
+@cli.command(name='delete-policy')
+@click.argument('bucket')
+def delete_policy(bucket):
+    s3.Bucket(bucket).Policy().delete()
+    puts(colored.green("Policy deleted"))

@@ -75,8 +75,38 @@ s3tk list-policy my-bucket my-bucket-2
 
 ### Update Policy [master]
 
+Make public
+
 ```sh
-s3tk update-policy --public --no-object-acl --encryption
+s3tk update-policy my-bucket --public
+```
+
+**Note:** This replaces the existing bucket policy
+
+Prevent object ACL
+
+```sh
+s3tk update-policy my-bucket --no-object-acl
+```
+
+Require encryption
+
+```sh
+s3tk update-policy my-bucket --encryption
+```
+
+Use many together
+
+```sh
+s3tk update-policy my-bucket --public --no-object-acl --encryption
+```
+
+### Delete Policy [master]
+
+Delete policy
+
+```sh
+s3tk delete-policy my-bucket
 ```
 
 ### Enable Logging

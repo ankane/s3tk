@@ -1,6 +1,7 @@
 ## 0.1.6 [unreleased]
 
 - Added `update-policy` command
+- Added `delete-policy` command
 - 2x performance for object commands
 
 ## 0.1.5
