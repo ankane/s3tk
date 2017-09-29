@@ -89,13 +89,13 @@ Require encryption
 s3tk update-policy my-bucket --encryption
 ```
 
-Make public
+Make all objects public
 
 ```sh
 s3tk update-policy my-bucket --public
 ```
 
-Use many together
+Use multiple together
 
 ```sh
 s3tk update-policy my-bucket --no-object-acl --encryption --public
