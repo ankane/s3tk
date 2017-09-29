@@ -2,6 +2,7 @@ import sys
 import os.path
 import json
 import fnmatch
+from collections import OrderedDict
 import boto3
 import botocore
 import click
@@ -322,36 +323,32 @@ def replace_policy(bucket, public=False, no_object_acl=False, encryption=False):
     statements = []
 
     if public:
-        statements.append({
-            'Sid': 'Public',
-            'Effect': 'Allow',
-            'Principal': '*',
-            'Action': ['s3:GetObject'],
-            'Resource': "arn:aws:s3:::%s/*" % bucket.name
-        })
+        statements.append(OrderedDict([
+            ('Sid', 'Public'),
+            ('Effect', 'Allow'),
+            ('Principal', '*'),
+            ('Action', ['s3:GetObject']),
+            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+        ]))
 
     if no_object_acl:
-        statements.append({
-            'Sid': 'NoObjectAcl',
-            'Effect': 'Deny',
-            'Principal': '*',
-            'Action': ['s3:PutObjectAcl'],
-            'Resource': "arn:aws:s3:::%s/*" % bucket.name
-        })
+        statements.append(OrderedDict([
+            ('Sid', 'NoObjectAcl'),
+            ('Effect', 'Deny'),
+            ('Principal', '*'),
+            ('Action', ['s3:PutObjectAcl']),
+            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+        ]))
 
     if encryption:
-        statements.append({
-            'Sid': 'Encryption',
-            'Effect': 'Deny',
-            'Principal': '*',
-            'Action': ['s3:PutObject'],
-            'Resource': "arn:aws:s3:::%s/*" % bucket.name,
-            'Condition': {
-                'StringNotEquals': {
-                  's3:x-amz-server-side-encryption': 'AES256'
-                }
-            }
-        })
+        statements.append(OrderedDict([
+            ('Sid', 'Encryption'),
+            ('Effect', 'Deny'),
+            ('Principal', '*'),
+            ('Action', ['s3:PutObject']),
+            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
+            ('Condition', {'StringNotEquals': {'s3:x-amz-server-side-encryption': 'AES256'}})
+        ]))
 
     if any(statements):
         puts('New policy')
