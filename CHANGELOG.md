@@ -1,4 +1,4 @@
-## 0.1.6 [unreleased]
+## 0.1.6
 
 - Added `scan-dns` command
 - Added `set-policy` command

@@ -59,7 +59,7 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
-### Scan DNS [master]
+### Scan DNS
 
 Scan Route 53 for bucket references
 
@@ -81,13 +81,13 @@ Only run on specific buckets
 s3tk list-policy my-bucket my-bucket-2
 ```
 
-Show named statements [master]
+Show named statements
 
 ```sh
 s3tk list-policy --named
 ```
 
-### Set Policy [master]
+### Set Policy
 
 **Note:** This replaces the previous policy
 
@@ -121,7 +121,7 @@ Use multiple together
 s3tk set-policy my-bucket --no-object-acl --encryption --public
 ```
 
-### Delete Policy [master]
+### Delete Policy
 
 Delete policy
 
