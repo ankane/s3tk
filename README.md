@@ -67,6 +67,8 @@ Scan Route 53 for buckets to make sure you own them
 s3tk scan-dns
 ```
 
+Otherwise, you may be susceptible to a [subdomain takeover](https://hackerone.com/reports/207576).
+
 ### List Policy
 
 List bucket policies
