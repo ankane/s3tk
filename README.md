@@ -61,7 +61,7 @@ s3tk scan --skip-logging --skip-versioning
 
 ### Scan DNS
 
-Scan Route 53 for bucket references
+Scan Route 53 for buckets to make sure you own them
 
 ```sh
 s3tk scan-dns
