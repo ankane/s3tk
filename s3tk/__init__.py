@@ -358,15 +358,15 @@ def list_policy(buckets, named=False):
 
                     for statement in policy["Statement"]:
                         if statement == public:
-                            named_statement = "public"
+                            named_statement = "Public"
                         elif statement == no_object_acl:
-                            named_statement = "no object ACL"
+                            named_statement = "No object ACL"
                         elif statement == no_uploads:
-                            named_statement = "no uploads"
+                            named_statement = "No uploads"
                         elif statement == encryption:
-                            named_statement = "encryption"
+                            named_statement = "Encryption"
                         else:
-                            named_statement = "custom"
+                            named_statement = "Custom"
 
                         puts(colored.yellow(named_statement))
 
