@@ -59,6 +59,14 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
+### Scan DNS [master]
+
+Scan Route 53 for bucket references
+
+```sh
+s3tk scan-dns
+```
+
 ### List Policy
 
 List bucket policies
@@ -99,6 +107,12 @@ Make all objects public
 
 ```sh
 s3tk set-policy my-bucket --public
+```
+
+Prevent new uploads
+
+```sh
+s3tk set-policy my-bucket --no-uploads
 ```
 
 Use multiple together
@@ -243,6 +257,16 @@ Here are the permissions needed for each command. Only include statements you ne
                 "s3:GetBucketPolicy",
                 "s3:GetBucketLogging",
                 "s3:GetBucketVersioning"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ScanDNS",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "route53:ListHostedZones",
+                "route53:ListResourceRecordSets"
             ],
             "Resource": "*"
         },

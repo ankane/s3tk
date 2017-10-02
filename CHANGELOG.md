@@ -1,5 +1,6 @@
 ## 0.1.6 [unreleased]
 
+- Added `scan-dns` command
 - Added `set-policy` command
 - Added `delete-policy` command
 - Added `--named` option to `list-policy` command

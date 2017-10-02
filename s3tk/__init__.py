@@ -253,6 +253,20 @@ def encryption_statement(bucket):
     ])
 
 
+def print_dns_bucket(name, buckets, found_buckets):
+    if not name in found_buckets:
+        puts(name)
+        with indent(2):
+            if name in buckets:
+                puts(colored.green('owned'))
+            else:
+                puts(colored.red('not owned'))
+
+            puts()
+
+        found_buckets.add(name)
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -284,6 +298,32 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
     if sum(1 for c in checks if c.status != 'passed') > 0:
         sys.exit(1)
+
+
+@cli.command(name='scan-dns')
+def scan_dns():
+    buckets = set([b.name for b in s3.buckets.all()])
+    found_buckets = set()
+
+    client = boto3.client('route53')
+    paginator = client.get_paginator('list_hosted_zones')
+
+    for page in paginator.paginate():
+        for hosted_zone in page['HostedZones']:
+            paginator2 = client.get_paginator('list_resource_record_sets')
+            for page2 in paginator2.paginate(HostedZoneId=hosted_zone['Id']):
+                for resource_set in page2['ResourceRecordSets']:
+                    if resource_set.get('AliasTarget'):
+                        value = resource_set['AliasTarget']['DNSName']
+                        if value.startswith('s3-website-') and value.endswith('.amazonaws.com.'):
+                            print_dns_bucket(resource_set['Name'][:-1], buckets, found_buckets)
+                    elif resource_set.get('ResourceRecords'):
+                        for record in resource_set['ResourceRecords']:
+                            value = record['Value']
+                            if value.endswith('.s3.amazonaws.com'):
+                                print_dns_bucket('.'.join(value.split('.')[:-3]), buckets, found_buckets)
+                            if 's3-website-' in value and value.endswith('.amazonaws.com'):
+                                print_dns_bucket(resource_set['Name'][:-1], buckets, found_buckets)
 
 
 @cli.command(name='enable-logging')
@@ -356,17 +396,17 @@ def list_policy(buckets, named=False):
                     no_uploads = no_uploads_statement(bucket)
                     encryption = encryption_statement(bucket)
 
-                    for statement in policy["Statement"]:
+                    for statement in policy['Statement']:
                         if statement == public:
-                            named_statement = "Public"
+                            named_statement = 'Public'
                         elif statement == no_object_acl:
-                            named_statement = "No object ACL"
+                            named_statement = 'No object ACL'
                         elif statement == no_uploads:
-                            named_statement = "No uploads"
+                            named_statement = 'No uploads'
                         elif statement == encryption:
-                            named_statement = "Encryption"
+                            named_statement = 'Encryption'
                         else:
-                            named_statement = "Custom"
+                            named_statement = 'Custom'
 
                         puts(colored.yellow(named_statement))
 
@@ -380,7 +420,7 @@ def list_policy(buckets, named=False):
 @click.argument('bucket')
 @click.option('--public', is_flag=True, help='Make all objects public')
 @click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
-@click.option('--no-uploads', is_flag=True, help='Prevent uploads')
+@click.option('--no-uploads', is_flag=True, help='Prevent new uploads')
 @click.option('--encryption', is_flag=True, help='Require encryption')
 def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encryption=False):
     bucket = s3.Bucket(bucket)
