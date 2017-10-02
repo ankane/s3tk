@@ -2,6 +2,7 @@
 
 - Added `set-policy` command
 - Added `delete-policy` command
+- Added `--named` option to `list-policy` command
 - 2x performance for object commands
 
 ## 0.1.5

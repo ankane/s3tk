@@ -73,6 +73,12 @@ Only run on specific buckets
 s3tk list-policy my-bucket my-bucket-2
 ```
 
+Show named statements [master]
+
+```sh
+s3tk list-policy --named
+```
+
 ### Set Policy [master]
 
 **Note:** This replaces the previous policy

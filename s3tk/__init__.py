@@ -212,6 +212,47 @@ def parallelize(bucket, only, _except, fn, args=()):
     Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
+def public_statement(bucket):
+    return OrderedDict([
+        ('Sid', 'Public'),
+        ('Effect', 'Allow'),
+        ('Principal', '*'),
+        ('Action', 's3:GetObject'),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+    ])
+
+
+def no_object_acl_statement(bucket):
+    return OrderedDict([
+        ('Sid', 'NoObjectAcl'),
+        ('Effect', 'Deny'),
+        ('Principal', '*'),
+        ('Action', 's3:PutObjectAcl'),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+    ])
+
+
+def no_uploads_statement(bucket):
+    return OrderedDict([
+        ('Sid', 'NoUploads'),
+        ('Effect', 'Deny'),
+        ('Principal', '*'),
+        ('Action', 's3:PutObject'),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+    ])
+
+
+def encryption_statement(bucket):
+    return OrderedDict([
+        ('Sid', 'Encryption'),
+        ('Effect', 'Deny'),
+        ('Principal', '*'),
+        ('Action', 's3:PutObject'),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
+        ('Condition', {'StringNotEquals': {'s3:x-amz-server-side-encryption': 'AES256'}})
+    ])
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -291,7 +332,8 @@ def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
 
 @cli.command(name='list-policy')
 @click.argument('buckets', nargs=-1)
-def list_policy(buckets):
+@click.option('--named', is_flag=True, help='Print named statements')
+def list_policy(buckets, named=False):
     for bucket in fetch_buckets(buckets):
         puts(bucket.name)
 
@@ -306,7 +348,30 @@ def list_policy(buckets):
             if policy is None:
                 puts(colored.yellow('None'))
             else:
-                puts(colored.yellow(json.dumps(json.loads(policy, object_pairs_hook=OrderedDict), indent=4)))
+                policy = json.loads(policy, object_pairs_hook=OrderedDict)
+
+                if named:
+                    public = public_statement(bucket)
+                    no_object_acl = no_object_acl_statement(bucket)
+                    no_uploads = no_uploads_statement(bucket)
+                    encryption = encryption_statement(bucket)
+
+                    for statement in policy["Statement"]:
+                        if statement == public:
+                            named_statement = "public"
+                        elif statement == no_object_acl:
+                            named_statement = "no object ACL"
+                        elif statement == no_uploads:
+                            named_statement = "no uploads"
+                        elif statement == encryption:
+                            named_statement = "encryption"
+                        else:
+                            named_statement = "custom"
+
+                        puts(colored.yellow(named_statement))
+
+                else:
+                    puts(colored.yellow(json.dumps(policy, indent=4)))
 
         puts()
 
@@ -324,41 +389,16 @@ def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encr
     statements = []
 
     if public:
-        statements.append(OrderedDict([
-            ('Sid', 'Public'),
-            ('Effect', 'Allow'),
-            ('Principal', '*'),
-            ('Action', ['s3:GetObject']),
-            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
-        ]))
+        statements.append(public_statement(bucket))
 
     if no_object_acl:
-        statements.append(OrderedDict([
-            ('Sid', 'NoObjectAcl'),
-            ('Effect', 'Deny'),
-            ('Principal', '*'),
-            ('Action', ['s3:PutObjectAcl']),
-            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
-        ]))
+        statements.append(no_object_acl_statement(bucket))
 
     if no_uploads:
-        statements.append(OrderedDict([
-            ('Sid', 'NoUploads'),
-            ('Effect', 'Deny'),
-            ('Principal', '*'),
-            ('Action', ['s3:PutObject']),
-            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
-        ]))
+        statements.append(no_uploads_statement(bucket))
 
     if encryption:
-        statements.append(OrderedDict([
-            ('Sid', 'Encryption'),
-            ('Effect', 'Deny'),
-            ('Principal', '*'),
-            ('Action', ['s3:PutObject']),
-            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
-            ('Condition', {'StringNotEquals': {'s3:x-amz-server-side-encryption': 'AES256'}})
-        ]))
+        statements.append(encryption_statement(bucket))
 
     if any(statements):
         puts('New policy')
