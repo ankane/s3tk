@@ -315,8 +315,9 @@ def list_policy(buckets):
 @click.argument('bucket')
 @click.option('--public', is_flag=True, help='Make all objects public')
 @click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
+@click.option('--no-uploads', is_flag=True, help='Prevent uploads')
 @click.option('--encryption', is_flag=True, help='Require encryption')
-def set_policy(bucket, public=False, no_object_acl=False, encryption=False):
+def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encryption=False):
     bucket = s3.Bucket(bucket)
     bucket_policy = bucket.Policy()
 
@@ -337,6 +338,15 @@ def set_policy(bucket, public=False, no_object_acl=False, encryption=False):
             ('Effect', 'Deny'),
             ('Principal', '*'),
             ('Action', ['s3:PutObjectAcl']),
+            ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+        ]))
+
+    if no_uploads:
+        statements.append(OrderedDict([
+            ('Sid', 'NoUploads'),
+            ('Effect', 'Deny'),
+            ('Principal', '*'),
+            ('Action', ['s3:PutObject']),
             ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
         ]))
 
