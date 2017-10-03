@@ -253,6 +253,14 @@ def encryption_statement(bucket):
     ])
 
 
+def statement_matches(s1, s2):
+    s1 = dict(s1)
+    s2 = dict(s2)
+    s1.pop('Sid', None)
+    s2.pop('Sid', None)
+    return s1 == s2
+
+
 def print_dns_bucket(name, buckets, found_buckets):
     if not name in found_buckets:
         puts(name)
@@ -397,13 +405,13 @@ def list_policy(buckets, named=False):
                     encryption = encryption_statement(bucket)
 
                     for statement in policy['Statement']:
-                        if statement == public:
+                        if statement_matches(statement, public):
                             named_statement = 'Public'
-                        elif statement == no_object_acl:
+                        elif statement_matches(statement, no_object_acl):
                             named_statement = 'No object ACL'
-                        elif statement == no_uploads:
+                        elif statement_matches(statement, no_uploads):
                             named_statement = 'No uploads'
-                        elif statement == encryption:
+                        elif statement_matches(statement, encryption):
                             named_statement = 'Encryption'
                         else:
                             named_statement = 'Custom'
