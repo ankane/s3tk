@@ -422,7 +422,8 @@ def list_policy(buckets, named=False):
 @click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
 @click.option('--no-uploads', is_flag=True, help='Prevent new uploads')
 @click.option('--encryption', is_flag=True, help='Require encryption')
-def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encryption=False):
+@click.option('--dry-run', is_flag=True, help='Dry run')
+def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encryption=False, dry_run=False):
     bucket = s3.Bucket(bucket)
     bucket_policy = bucket.Policy()
 
@@ -448,7 +449,9 @@ def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encr
         ])
         with indent(2):
             puts(colored.yellow(json.dumps(policy, indent=4)))
-        bucket_policy.put(Policy=json.dumps(policy))
+
+        if not dry_run:
+            bucket_policy.put(Policy=json.dumps(policy))
     else:
         abort('No policies specified')
 

@@ -1,3 +1,7 @@
+## 0.1.7 [unreleased]
+
+- Added `--dry-run` option for `set-policy` command
+
 ## 0.1.6
 
 - Added `scan-dns` command
