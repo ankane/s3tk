@@ -499,6 +499,12 @@ def update_policy(buckets, encryption=None, dry_run=False):
         puts(bucket.name)
 
         policy = fetch_policy(bucket)
+        if not policy:
+            policy = OrderedDict([
+                ('Version', '2012-10-17'),
+                ('Statement', [])
+            ])
+
         es = encryption_statement(bucket)
         es_index = next((i for i, s in enumerate(policy['Statement']) if statement_matches(s, es)), -1)
 
@@ -521,6 +527,8 @@ def update_policy(buckets, encryption=None, dry_run=False):
                         bucket.Policy().put(Policy=json.dumps(policy))
                 elif encryption is False:
                     puts(colored.yellow("No encryption change"))
+
+        puts()
 
 
 @cli.command(name='delete-policy')
