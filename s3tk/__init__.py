@@ -300,6 +300,14 @@ def print_dns_bucket(name, buckets, found_buckets):
         found_buckets.add(name)
 
 
+def print_policy(policy):
+    with indent(2):
+        if any(policy['Statement']):
+            puts(colored.yellow(json.dumps(policy, indent=4)))
+        else:
+            puts(colored.yellow("None"))
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -480,8 +488,7 @@ def set_policy(bucket, public=False, no_object_acl=False, public_uploads=False, 
             ('Version', '2012-10-17'),
             ('Statement', statements)
         ])
-        with indent(2):
-            puts(colored.yellow(json.dumps(policy, indent=4)))
+        print_policy(policy)
 
         if not dry_run:
             bucket_policy.put(Policy=json.dumps(policy))
@@ -491,44 +498,47 @@ def set_policy(bucket, public=False, no_object_acl=False, public_uploads=False, 
 
 # experimental
 @cli.command(name='update-policy')
-@click.argument('buckets', nargs=-1)
+@click.argument('bucket')
 @click.option('--encryption/--no-encryption', default=None, help='Require encryption')
 @click.option('--dry-run', is_flag=True, help='Dry run')
-def update_policy(buckets, encryption=None, dry_run=False):
-    for bucket in fetch_buckets(buckets):
-        puts(bucket.name)
+def update_policy(bucket, encryption=None, dry_run=False):
+    bucket = s3.Bucket(bucket)
 
-        policy = fetch_policy(bucket)
-        if not policy:
-            policy = OrderedDict([
-                ('Version', '2012-10-17'),
-                ('Statement', [])
-            ])
+    policy = fetch_policy(bucket)
+    if not policy:
+        policy = OrderedDict([
+            ('Version', '2012-10-17'),
+            ('Statement', [])
+        ])
 
-        es = encryption_statement(bucket)
-        es_index = next((i for i, s in enumerate(policy['Statement']) if statement_matches(s, es)), -1)
+    es = encryption_statement(bucket)
+    es_index = next((i for i, s in enumerate(policy['Statement']) if statement_matches(s, es)), -1)
 
-        with indent(2):
-            if es_index != -1:
-                if encryption:
-                    puts(colored.yellow("No encryption change"))
-                elif encryption is False:
-                    puts(colored.yellow("Removing encryption"))
+    if es_index != -1:
+        if encryption:
+            puts("No encryption change")
+            print_policy(policy)
+        elif encryption is False:
+            puts("Removing encryption")
+            policy['Statement'].pop(es_index)
+            print_policy(policy)
 
-                    if not dry_run:
-                        policy['Statement'].pop(es_index)
-                        bucket.Policy().put(Policy=json.dumps(policy))
-            else:
-                if encryption:
-                    puts(colored.yellow("Adding encryption"))
+            if not dry_run:
+                if any(policy['Statement']):
+                    bucket.Policy().put(Policy=json.dumps(policy))
+                else:
+                    bucket.Policy().delete()
+    else:
+        if encryption:
+            puts("Adding encryption")
+            policy['Statement'].append(es)
+            print_policy(policy)
 
-                    if not dry_run:
-                        policy['Statement'].append(es)
-                        bucket.Policy().put(Policy=json.dumps(policy))
-                elif encryption is False:
-                    puts(colored.yellow("No encryption change"))
-
-        puts()
+            if not dry_run:
+                bucket.Policy().put(Policy=json.dumps(policy))
+        elif encryption is False:
+            puts(colored.yellow("No encryption change"))
+            print_policy(policy)
 
 
 @cli.command(name='delete-policy')
