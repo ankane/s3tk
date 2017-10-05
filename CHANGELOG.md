@@ -1,7 +1,6 @@
 ## 0.1.7 [unreleased]
 
-- Improved `no-object-acl` policy
-- Added `--dry-run` option for `set-policy` command
+- Added `--dry-run` and `public-uploads` options to `set-policy` command
 
 ## 0.1.6
 

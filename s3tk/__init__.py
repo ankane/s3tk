@@ -228,18 +228,18 @@ def no_object_acl_statement(bucket):
         ('Effect', 'Deny'),
         ('Principal', '*'),
         ('Action', 's3:PutObjectAcl'),
-        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
-        ('Condition', {'StringNotEquals': {'s3:x-amz-acl': 'private'}})
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
     ])
 
 
-def no_object_acl_legacy_statement(bucket):
+def public_uploads_statement(bucket):
     return OrderedDict([
-        ('Sid', 'NoObjectAcl'),
+        ('Sid', 'PublicUploads'),
         ('Effect', 'Deny'),
         ('Principal', '*'),
-        ('Action', 's3:PutObjectAcl'),
-        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
+        ('Action', ['s3:PutObject', 's3:PutObjectAcl']),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
+        ('Condition', {'StringNotEquals': {'s3:x-amz-acl': 'public-read'}})
     ])
 
 
@@ -412,7 +412,7 @@ def list_policy(buckets, named=False):
                 if named:
                     public = public_statement(bucket)
                     no_object_acl = no_object_acl_statement(bucket)
-                    no_object_acl_legacy = no_object_acl_legacy_statement(bucket)
+                    public_uploads = public_uploads_statement(bucket)
                     no_uploads = no_uploads_statement(bucket)
                     encryption = encryption_statement(bucket)
 
@@ -421,8 +421,8 @@ def list_policy(buckets, named=False):
                             named_statement = 'Public'
                         elif statement_matches(statement, no_object_acl):
                             named_statement = 'No object ACL'
-                        elif statement_matches(statement, no_object_acl_legacy):
-                            named_statement = 'No object ACL (legacy)'
+                        elif statement_matches(statement, public_uploads):
+                            named_statement = 'Public uploads'
                         elif statement_matches(statement, no_uploads):
                             named_statement = 'No uploads'
                         elif statement_matches(statement, encryption):
@@ -442,10 +442,11 @@ def list_policy(buckets, named=False):
 @click.argument('bucket')
 @click.option('--public', is_flag=True, help='Make all objects public')
 @click.option('--no-object-acl', is_flag=True, help='Prevent object ACL')
+@click.option('--public-uploads', is_flag=True, help='Only public uploads')
 @click.option('--no-uploads', is_flag=True, help='Prevent new uploads')
 @click.option('--encryption', is_flag=True, help='Require encryption')
 @click.option('--dry-run', is_flag=True, help='Dry run')
-def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encryption=False, dry_run=False):
+def set_policy(bucket, public=False, no_object_acl=False, public_uploads=False, no_uploads=False, encryption=False, dry_run=False):
     bucket = s3.Bucket(bucket)
     bucket_policy = bucket.Policy()
 
@@ -456,6 +457,9 @@ def set_policy(bucket, public=False, no_object_acl=False, no_uploads=False, encr
 
     if no_object_acl:
         statements.append(no_object_acl_statement(bucket))
+
+    if public_uploads:
+        statements.append(public_uploads_statement(bucket))
 
     if no_uploads:
         statements.append(no_uploads_statement(bucket))
