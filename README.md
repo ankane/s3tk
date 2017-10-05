@@ -487,7 +487,12 @@ Prevent ACL on individual objects
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObjectAcl",
-            "Resource": "arn:aws:s3:::my-bucket/*"
+            "Resource": "arn:aws:s3:::my-bucket/*",
+            "Condition": {
+                "StringNotEquals": {
+                    "s3:x-amz-acl": "private"
+                }
+            }
         }
     ]
 }
