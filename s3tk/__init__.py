@@ -228,6 +228,17 @@ def no_object_acl_statement(bucket):
         ('Effect', 'Deny'),
         ('Principal', '*'),
         ('Action', 's3:PutObjectAcl'),
+        ('Resource', 'arn:aws:s3:::%s/*' % bucket.name),
+        ('Condition', {'StringNotEquals': {'s3:x-amz-acl': 'private'}})
+    ])
+
+
+def no_object_acl_legacy_statement(bucket):
+    return OrderedDict([
+        ('Sid', 'NoObjectAcl'),
+        ('Effect', 'Deny'),
+        ('Principal', '*'),
+        ('Action', 's3:PutObjectAcl'),
         ('Resource', 'arn:aws:s3:::%s/*' % bucket.name)
     ])
 
@@ -401,6 +412,7 @@ def list_policy(buckets, named=False):
                 if named:
                     public = public_statement(bucket)
                     no_object_acl = no_object_acl_statement(bucket)
+                    no_object_acl_legacy = no_object_acl_legacy_statement(bucket)
                     no_uploads = no_uploads_statement(bucket)
                     encryption = encryption_statement(bucket)
 
@@ -409,6 +421,8 @@ def list_policy(buckets, named=False):
                             named_statement = 'Public'
                         elif statement_matches(statement, no_object_acl):
                             named_statement = 'No object ACL'
+                        elif statement_matches(statement, no_object_acl_legacy):
+                            named_statement = 'No object ACL (legacy)'
                         elif statement_matches(statement, no_uploads):
                             named_statement = 'No uploads'
                         elif statement_matches(statement, encryption):
