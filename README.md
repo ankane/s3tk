@@ -93,7 +93,7 @@ s3tk list-policy --named
 
 **Note:** This replaces the previous policy
 
-Prevent object ACL
+Only private uploads
 
 ```sh
 s3tk set-policy my-bucket --no-object-acl
@@ -105,22 +105,10 @@ Require encryption
 s3tk set-policy my-bucket --encryption
 ```
 
-Make all objects public
-
-```sh
-s3tk set-policy my-bucket --public
-```
-
-Prevent new uploads
-
-```sh
-s3tk set-policy my-bucket --no-uploads
-```
-
 Use multiple together
 
 ```sh
-s3tk set-policy my-bucket --no-object-acl --encryption --public
+s3tk set-policy my-bucket --no-object-acl --encryption
 ```
 
 ### Delete Policy
@@ -471,13 +459,12 @@ ORDER BY 1
 Keep things simple and follow the principle of least privilege to reduce the chance of mistakes.
 
 - Strictly limit who can perform bucket-related operations
-- Don’t allow ACL to be set on individual objects (no `s3:PutObjectAcl`)
-- Avoid mixing objects with different permissions in the same bucket
+- Avoid mixing objects with different permissions in the same bucket (use a policy to enforce this)
 - Monitor configuration frequently for changes
 
 ## Bucket Policies
 
-Prevent ACL on individual objects
+Only private uploads
 
 ```json
 {
@@ -487,18 +474,13 @@ Prevent ACL on individual objects
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObjectAcl",
-            "Resource": "arn:aws:s3:::my-bucket/*",
-            "Condition": {
-                "StringNotEquals": {
-                    "s3:x-amz-acl": "private"
-                }
-            }
+            "Resource": "arn:aws:s3:::my-bucket/*"
         }
     ]
 }
 ```
 
-Prevent unencrypted uploads (S3-managed keys)
+Only encrypted uploads (S3-managed keys)
 
 ```json
 {
