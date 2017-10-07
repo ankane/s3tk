@@ -181,7 +181,7 @@ Reset ACL on all objects in a bucket
 s3tk reset-object-acl my-bucket
 ```
 
-This makes all objects private so you only need to manage bucket permissions (best practice). See [bucket policies](#bucket-policies) for how to enforce going forward.
+This makes all objects private. See [bucket policies](#bucket-policies) for how to enforce going forward.
 
 Use the `--dry-run` flag to test
 
@@ -459,7 +459,8 @@ ORDER BY 1
 Keep things simple and follow the principle of least privilege to reduce the chance of mistakes.
 
 - Strictly limit who can perform bucket-related operations
-- Avoid mixing objects with different permissions in the same bucket (use a policy to enforce this)
+- Avoid mixing objects with different permissions in the same bucket (use a bucket policy to enforce this)
+- Don’t specify public read permissions on a bucket level (no `GetObject` in bucket policy)
 - Monitor configuration frequently for changes
 
 ## Bucket Policies
