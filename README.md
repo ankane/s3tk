@@ -508,7 +508,7 @@ There is currently no way to do this with customer-provided keys.
 
 ## Notes
 
-The `enable-logging` and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
+The `set-policy`, `enable-logging`, and `enable-versioning` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
 ```tf
 resource "aws_s3_bucket" "my_bucket" {
