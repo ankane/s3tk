@@ -59,16 +59,6 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
-### Scan DNS
-
-Scan Route 53 for buckets to make sure you own them
-
-```sh
-s3tk scan-dns
-```
-
-Otherwise, you may be susceptible to [subdomain takeover](https://hackerone.com/reports/207576)
-
 ### List Policy
 
 List bucket policies
@@ -225,6 +215,16 @@ A few notes about encryption:
 
 - objects will lose any custom ACL
 - we recommend setting a bucket policy to deny unencrypted uploads - see [bucket policies](#bucket-policies) for instructions
+
+### Scan DNS
+
+Scan Route 53 for buckets to make sure you own them
+
+```sh
+s3tk scan-dns
+```
+
+Otherwise, you may be susceptible to [subdomain takeover](https://hackerone.com/reports/207576)
 
 ## Credentials
 
