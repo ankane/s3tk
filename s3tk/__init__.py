@@ -118,9 +118,11 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
 
         if encrypted:
             puts(obj.key + ' ' + colored.green('already encrypted'))
+            return 'already encrypted'
         else:
             if dry_run:
                 puts(obj.key + ' ' + colored.yellow('to be encrypted'))
+                return 'to be encrypted'
             else:
                 copy_source = {'Bucket': bucket_name, 'Key': obj.key}
 
@@ -144,9 +146,11 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
                     )
 
                 puts(obj.key + ' ' + colored.blue('just encrypted'))
+                return 'just encrypted'
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(obj.key + ' ' + colored.red(str(e)))
+        return 'error'
 
 
 def scan_object(bucket_name, key):
@@ -393,7 +397,12 @@ def enable_versioning(buckets, dry_run=False):
 @click.option('--kms-key-id', help='KMS key id')
 @click.option('--customer-key', help='Customer key')
 def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, customer_key=None):
-    parallelize(bucket, only, _except, encrypt_object, (dry_run, kms_key_id, customer_key))
+    summary = Counter(parallelize(bucket, only, _except, encrypt_object, (dry_run, kms_key_id, customer_key,)))
+
+    puts()
+    puts("Summary")
+    for k, v in summary.most_common():
+        puts(k + ': ' + str(v))
 
 
 @cli.command(name='scan-object-acl')
