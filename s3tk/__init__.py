@@ -2,7 +2,7 @@ import sys
 import os.path
 import json
 import fnmatch
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 import boto3
 import botocore
 import click
@@ -166,8 +166,10 @@ def scan_object(bucket_name, key):
         else:
             puts(obj.key + ' ' + colored.yellow(mode))
 
+        return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(obj.key + ' ' + colored.red(str(e)))
+        return 'error'
 
 
 def reset_object(bucket_name, key, dry_run):
@@ -209,7 +211,7 @@ def parallelize(bucket, only, _except, fn, args=()):
 
     objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
-    Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+    return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):
@@ -399,7 +401,12 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
 def scan_object_acl(bucket, only=None, _except=None):
-    parallelize(bucket, only, _except, scan_object)
+    summary = Counter(parallelize(bucket, only, _except, scan_object))
+
+    puts()
+    puts("Summary")
+    for k, v in summary.most_common():
+        puts(k + ': ' + str(v))
 
 
 @cli.command(name='reset-object-acl')

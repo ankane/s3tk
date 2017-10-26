@@ -1,6 +1,7 @@
 ## 0.1.7 [unreleased]
 
 - Added `--dry-run` and `public-uploads` options to `set-policy` command
+- Added summary to `scan-object-acl` command
 
 ## 0.1.6
 
