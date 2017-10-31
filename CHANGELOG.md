@@ -2,6 +2,7 @@
 
 - Added `--dry-run` and `public-uploads` options to `set-policy` command
 - Added summary to `scan-object-acl` and `encrypt` commands
+- Added `--sns-topic` to `scan` command
 
 ## 0.1.6
 

@@ -326,7 +326,8 @@ def cli():
 @click.option('--log-prefix', help='Check log prefix')
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
-def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False):
+@click.option('--sns-topic', help='Send SNS notification for failures')
+def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, sns_topic=None):
     checks = []
     for bucket in fetch_buckets(buckets):
         puts(bucket.name)
@@ -343,7 +344,15 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
         puts()
 
-    if sum(1 for c in checks if c.status != 'passed') > 0:
+    failed_checks = [c for c in checks if c.status != 'passed']
+    if any(failed_checks):
+        if sns_topic:
+            topic = boto3.resource('sns').Topic(sns_topic)
+            message = ''
+            for check in failed_checks:
+                msg = check.fail_message if check.status == 'failed' else 'access denied'
+                message += check.bucket.name + ': ' + check.name + ' ' + msg + '\n'
+            topic.publish(Message=message, Subject='[s3tk] Scan Failures')
         sys.exit(1)
 
 
