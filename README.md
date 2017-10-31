@@ -59,6 +59,12 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
+Get email notifications of failures (via SNS) [master]
+
+```sh
+s3tk scan --sns-topic arn:aws:sns:...
+```
+
 ### List Policy
 
 List bucket policies
