@@ -254,6 +254,8 @@ Delete all unencrypted versions of objects in a bucket
 s3tk delete-unencrypted-versions my-bucket
 ```
 
+**Note:** For safety, this will not delete any current versions of objects
+
 ### Scan DNS
 
 Scan Route 53 for buckets to make sure you own them
