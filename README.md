@@ -256,6 +256,8 @@ s3tk delete-unencrypted-versions my-bucket
 
 For safety, this will not delete any current versions of objects
 
+Use the `--dry-run` flag to test
+
 Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 
 ### Scan DNS
