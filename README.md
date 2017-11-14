@@ -181,6 +181,8 @@ s3tk enable-default-encryption my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
+**Note:** This does not encrypt existing objects. Use the `encrypt` command for this.
+
 ### Scan Object ACL
 
 Scan ACL on all objects in a bucket
