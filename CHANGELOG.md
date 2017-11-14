@@ -1,8 +1,9 @@
 ## 0.1.7 [unreleased]
 
+- Added `enable-default-encryption` command
 - Added `--dry-run` and `public-uploads` options to `set-policy` command
 - Added summary to `scan-object-acl` and `encrypt` commands
-- Added `--sns-topic` to `scan` command
+- Added `--default-encryption` and `--sns-topic` to `scan` command
 
 ## 0.1.6
 

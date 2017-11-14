@@ -122,3 +122,35 @@ class VersioningCheck(Check):
 
     def _fix(self, options):
         self.bucket.Versioning().enable()
+
+
+class EncryptionCheck(Check):
+    name = 'Default encryption'
+    pass_message = 'enabled'
+    fail_message = 'disabled'
+
+    def _passed(self):
+        response = None
+        try:
+            response = self.bucket.meta.client.get_bucket_encryption(
+                Bucket=self.bucket.name
+            )
+        except botocore.exceptions.ClientError as e:
+            if 'ServerSideEncryptionConfigurationNotFoundError' not in str(e):
+                raise
+
+        return response is not None
+
+    def _fix(self, options):
+        self.bucket.meta.client.put_bucket_encryption(
+            Bucket=self.bucket.name,
+            ServerSideEncryptionConfiguration={
+                'Rules': [
+                    {
+                        'ApplyServerSideEncryptionByDefault': {
+                            'SSEAlgorithm': 'AES256'
+                        }
+                    }
+                ]
+            }
+        )

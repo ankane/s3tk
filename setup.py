@@ -11,7 +11,8 @@ setup(
     packages=['s3tk'],
     scripts=['bin/s3tk'],
     install_requires=[
-        'boto3',
+        'boto3>=1.4.7',
+        'botocore>=1.7.43',
         'clint',
         'click',
         'joblib'

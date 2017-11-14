@@ -59,6 +59,12 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
+Include default encryption [master]
+
+```sh
+s3tk scan --default-encryption
+```
+
 Get email notifications of failures (via SNS) [master]
 
 ```sh
@@ -159,6 +165,22 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
+### Enable Default Encryption [master]
+
+Enable default encryption on all buckets
+
+```sh
+s3tk enable-default-encryption
+```
+
+Only on specific buckets
+
+```sh
+s3tk enable-default-encryption my-bucket my-bucket-2
+```
+
+Use the `--dry-run` flag to test
+
 ### Scan Object ACL
 
 Scan ACL on all objects in a bucket
@@ -252,7 +274,8 @@ Here are the permissions needed for each command. Only include statements you ne
                 "s3:GetBucketAcl",
                 "s3:GetBucketPolicy",
                 "s3:GetBucketLogging",
-                "s3:GetBucketVersioning"
+                "s3:GetBucketVersioning",
+                "s3:GetEncryptionConfiguration"
             ],
             "Resource": "*"
         },
@@ -306,6 +329,15 @@ Here are the permissions needed for each command. Only include statements you ne
             "Action": [
                 "s3:ListAllMyBuckets",
                 "s3:PutBucketVersioning"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EnableDefaultEncryption",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "s3:PutEncryptionConfiguration"
             ],
             "Resource": "*"
         },

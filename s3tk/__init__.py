@@ -8,7 +8,7 @@ import botocore
 import click
 from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
-from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck
+from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck, EncryptionCheck
 
 __version__ = '0.1.6'
 
@@ -326,8 +326,9 @@ def cli():
 @click.option('--log-prefix', help='Check log prefix')
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
+@click.option('--default-encryption', is_flag=True, help='Include default encryption check')
 @click.option('--sns-topic', help='Send SNS notification for failures')
-def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, sns_topic=None):
+def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, default_encryption=False, sns_topic=None):
     checks = []
     for bucket in fetch_buckets(buckets):
         puts(bucket.name)
@@ -341,6 +342,9 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
         if not skip_versioning:
             checks.append(perform(VersioningCheck(bucket)))
+
+        if default_encryption:
+            checks.append(perform(EncryptionCheck(bucket)))
 
         puts()
 
@@ -396,6 +400,13 @@ def enable_logging(buckets, log_bucket=None, log_prefix=None, dry_run=False):
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def enable_versioning(buckets, dry_run=False):
     fix_check(VersioningCheck, buckets, dry_run)
+
+
+@cli.command(name='enable-default-encryption')
+@click.argument('buckets', nargs=-1)
+@click.option('--dry-run', is_flag=True, help='Dry run')
+def enable_versioning(buckets, dry_run=False):
+    fix_check(EncryptionCheck, buckets, dry_run)
 
 
 @cli.command()
