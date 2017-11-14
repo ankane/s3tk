@@ -182,25 +182,36 @@ def reset_object(bucket_name, key, dry_run):
     try:
         if dry_run:
             puts(obj.key + ' ' + colored.yellow('ACL to be reset'))
+            return 'ACL to be reset'
         else:
             obj.Acl().put(ACL='private')
             puts(obj.key + ' ' + colored.blue('ACL reset'))
+            return 'ACL reset'
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(obj.key + ' ' + colored.red(str(e)))
+        return 'error'
 
 
 def delete_unencrypted_version(bucket_name, key, id, dry_run):
     object_version = s3.ObjectVersion(bucket_name, key, id)
-    obj = object_version.get()
-    if obj.get('ServerSideEncryption') or obj.get('SSECustomerAlgorithm'):
-        puts(key + ' ' + id + ' ' + colored.green('encrypted'))
-    else:
-        if dry_run:
-            puts(key + ' ' + id + ' ' + colored.blue('to be deleted'))
+
+    try:
+        obj = object_version.get()
+        if obj.get('ServerSideEncryption') or obj.get('SSECustomerAlgorithm'):
+            puts(key + ' ' + id + ' ' + colored.green('encrypted'))
+            return 'encrypted'
         else:
-            puts(key + ' ' + id + ' ' + colored.blue('deleted'))
-            object_version.delete()
+            if dry_run:
+                puts(key + ' ' + id + ' ' + colored.blue('to be deleted'))
+                return 'to be deleted'
+            else:
+                puts(key + ' ' + id + ' ' + colored.blue('deleted'))
+                object_version.delete()
+                return 'deleted'
+    except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
+        puts(key + ' ' + id + ' ' + colored.red(str(e)))
+        return 'error'
 
 
 def object_matches(key, only, _except):
@@ -461,7 +472,12 @@ def scan_object_acl(bucket, only=None, _except=None):
 @click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
-    parallelize(bucket, only, _except, reset_object, (dry_run,))
+    summary = Counter(parallelize(bucket, only, _except, reset_object, (dry_run,)))
+
+    puts()
+    puts("Summary")
+    for k, v in summary.most_common():
+        puts(k + ': ' + str(v))
 
 
 @cli.command(name='delete-unencrypted-versions')
@@ -470,7 +486,12 @@ def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
 @click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def delete_unencrypted_versions(bucket, only=None, _except=None, dry_run=False):
-    parallelize(bucket, only, _except, delete_unencrypted_version, (dry_run,), True)
+    summary = Counter(parallelize(bucket, only, _except, delete_unencrypted_version, (dry_run,), True))
+
+    puts()
+    puts("Summary")
+    for k, v in summary.most_common():
+        puts(k + ': ' + str(v))
 
 
 @cli.command(name='list-policy')
