@@ -59,13 +59,13 @@ Skip logging or versioning
 s3tk scan --skip-logging --skip-versioning
 ```
 
-Include default encryption [master]
+Include default encryption
 
 ```sh
 s3tk scan --default-encryption
 ```
 
-Get email notifications of failures (via SNS) [master]
+Get email notifications of failures (via SNS)
 
 ```sh
 s3tk scan --sns-topic arn:aws:sns:...
@@ -165,7 +165,7 @@ s3tk enable-versioning my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
-### Enable Default Encryption [master]
+### Enable Default Encryption
 
 Enable [default encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html) on all buckets
 
