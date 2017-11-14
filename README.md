@@ -167,7 +167,7 @@ Use the `--dry-run` flag to test
 
 ### Enable Default Encryption [master]
 
-Enable default encryption on all buckets
+Enable [default encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html) on all buckets
 
 ```sh
 s3tk enable-default-encryption
