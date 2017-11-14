@@ -342,6 +342,15 @@ def print_policy(policy):
             puts(colored.yellow("None"))
 
 
+def summarize(values):
+    summary = Counter(values)
+
+    puts()
+    puts("Summary")
+    for k, v in summary.most_common():
+        puts(k + ': ' + str(v))
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -445,12 +454,7 @@ def enable_versioning(buckets, dry_run=False):
 @click.option('--kms-key-id', help='KMS key id')
 @click.option('--customer-key', help='Customer key')
 def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, customer_key=None):
-    summary = Counter(parallelize(bucket, only, _except, encrypt_object, (dry_run, kms_key_id, customer_key,)))
-
-    puts()
-    puts("Summary")
-    for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
+    summarize(parallelize(bucket, only, _except, encrypt_object, (dry_run, kms_key_id, customer_key,)))
 
 
 @cli.command(name='scan-object-acl')
@@ -458,12 +462,7 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
 def scan_object_acl(bucket, only=None, _except=None):
-    summary = Counter(parallelize(bucket, only, _except, scan_object))
-
-    puts()
-    puts("Summary")
-    for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
+    summarize(parallelize(bucket, only, _except, scan_object))
 
 
 @cli.command(name='reset-object-acl')
@@ -472,12 +471,7 @@ def scan_object_acl(bucket, only=None, _except=None):
 @click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
-    summary = Counter(parallelize(bucket, only, _except, reset_object, (dry_run,)))
-
-    puts()
-    puts("Summary")
-    for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
+    summarize(parallelize(bucket, only, _except, reset_object, (dry_run,)))
 
 
 @cli.command(name='delete-unencrypted-versions')
@@ -486,12 +480,7 @@ def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
 @click.option('--except', '_except', help='Except certain objects')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def delete_unencrypted_versions(bucket, only=None, _except=None, dry_run=False):
-    summary = Counter(parallelize(bucket, only, _except, delete_unencrypted_version, (dry_run,), True))
-
-    puts()
-    puts("Summary")
-    for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
+    summarize(parallelize(bucket, only, _except, delete_unencrypted_version, (dry_run,), True))
 
 
 @cli.command(name='list-policy')
