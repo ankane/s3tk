@@ -1,3 +1,7 @@
+## 0.1.8 [unreleased]
+
+- Added `delete-unencrypted-versions` command
+
 ## 0.1.7
 
 - Added `enable-default-encryption` command

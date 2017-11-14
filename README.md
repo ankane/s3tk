@@ -246,6 +246,14 @@ A few notes about encryption:
 - objects will lose any custom ACL
 - we recommend setting a bucket policy to deny unencrypted uploads - see [bucket policies](#bucket-policies) for instructions
 
+### Delete Unencrypted Versions [master]
+
+Delete all unencrypted versions of objects in a bucket
+
+```sh
+s3tk delete-unencrypted-versions my-bucket
+```
+
 ### Scan DNS
 
 Scan Route 53 for buckets to make sure you own them
@@ -362,6 +370,18 @@ Here are the permissions needed for each command. Only include statements you ne
                 "s3:ListBucket",
                 "s3:GetObject",
                 "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::my-bucket",
+                "arn:aws:s3:::my-bucket/*"
+            ]
+        },
+        {
+            "Sid": "DeleteUnencryptedVersions",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucketVersions",
+                "s3:DeleteObjectVersion"
             ],
             "Resource": [
                 "arn:aws:s3:::my-bucket",

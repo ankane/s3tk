@@ -190,6 +190,19 @@ def reset_object(bucket_name, key, dry_run):
         puts(obj.key + ' ' + colored.red(str(e)))
 
 
+def delete_unencrypted_version(bucket_name, key, id, dry_run):
+    object_version = s3.ObjectVersion(bucket_name, key, id)
+    obj = object_version.get()
+    if obj.get('ServerSideEncryption') or obj.get('SSECustomerAlgorithm'):
+        puts(key + ' ' + id + ' ' + colored.green('encrypted'))
+    else:
+        if dry_run:
+            puts(key + ' ' + id + ' ' + colored.blue('to be deleted'))
+        else:
+            puts(key + ' ' + id + ' ' + colored.blue('deleted'))
+            object_version.delete()
+
+
 def object_matches(key, only, _except):
     match = True
 
@@ -202,7 +215,7 @@ def object_matches(key, only, _except):
     return match
 
 
-def parallelize(bucket, only, _except, fn, args=()):
+def parallelize(bucket, only, _except, fn, args=(), versions=False):
     bucket = s3.Bucket(bucket)
 
     # use prefix for performance
@@ -213,9 +226,13 @@ def parallelize(bucket, only, _except, fn, args=()):
         if prefix:
             prefix = prefix + '/'
 
-    objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
-
-    return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+    if versions:
+        object_versions = bucket.object_versions.filter(Prefix=prefix) if prefix else bucket.object_versions.all()
+        # delete markers have no size
+        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
+    else:
+        objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
+        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):
@@ -445,6 +462,15 @@ def scan_object_acl(bucket, only=None, _except=None):
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def reset_object_acl(bucket, only=None, _except=None, dry_run=False):
     parallelize(bucket, only, _except, reset_object, (dry_run,))
+
+
+@cli.command(name='delete-unencrypted-versions')
+@click.argument('bucket')
+@click.option('--only', help='Only certain objects')
+@click.option('--except', '_except', help='Except certain objects')
+@click.option('--dry-run', is_flag=True, help='Dry run')
+def delete_unencrypted_versions(bucket, only=None, _except=None, dry_run=False):
+    parallelize(bucket, only, _except, delete_unencrypted_version, (dry_run,), True)
 
 
 @cli.command(name='list-policy')
