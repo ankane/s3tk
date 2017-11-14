@@ -1,4 +1,4 @@
-## 0.1.7 [unreleased]
+## 0.1.7
 
 - Added `enable-default-encryption` command
 - Added `--dry-run` and `public-uploads` options to `set-policy` command
