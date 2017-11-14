@@ -181,7 +181,7 @@ s3tk enable-default-encryption my-bucket my-bucket-2
 
 Use the `--dry-run` flag to test
 
-**Note:** This does not encrypt existing objects. Use the `encrypt` command for this.
+**Note:** This does not encrypt existing objects - use the `encrypt` command for this
 
 ### Scan Object ACL
 
@@ -254,7 +254,7 @@ Delete all unencrypted versions of objects in a bucket
 s3tk delete-unencrypted-versions my-bucket
 ```
 
-**Note:** For safety, this will not delete any current versions of objects
+For safety, this will not delete any current versions of objects
 
 ### Scan DNS
 
