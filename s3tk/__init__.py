@@ -12,8 +12,6 @@ from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck, Encryp
 
 __version__ = '0.1.7'
 
-s3 = boto3.resource('s3')
-
 canned_acls = [
     {
         'acl': 'private',
@@ -354,6 +352,8 @@ def summarize(values):
 @click.group()
 @click.version_option(version=__version__)
 def cli():
+    global s3
+    s3 = boto3.resource('s3')
     pass
 
 
