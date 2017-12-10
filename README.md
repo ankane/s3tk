@@ -20,6 +20,15 @@ Run:
 pip install s3tk
 ```
 
+Use the [AWS CLI](https://github.com/aws/aws-cli) to set up your credentials:
+
+```sh
+pip install awscli
+aws configure
+```
+
+See [IAM policies](#iam-policies) needed for each command, as well as [other options for credentials](#credentials).
+
 ## Commands
 
 ### Scan
@@ -591,6 +600,16 @@ resource "aws_s3_bucket" "my_bucket" {
   }
 }
 ```
+
+## Credentials
+
+To use a different AWS profile, pass:
+
+```sh
+AWS_PROFILE=my-profile s3tk ...
+```
+
+You can also pass `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as environment variables.
 
 ## Upgrading
 
