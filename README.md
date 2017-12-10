@@ -281,7 +281,7 @@ Otherwise, you may be susceptible to [subdomain takeover](https://hackerone.com/
 
 ## Credentials
 
-Credentials can be specified in `~/.aws/credentials` or with environment variables.
+Credentials can be specified in `~/.aws/credentials` or with environment variables. See [this guide](http://boto3.readthedocs.io/en/latest/guide/configuration.html) for an explanation of environment variables.
 
 ## IAM Policies
 
