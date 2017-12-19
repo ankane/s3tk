@@ -371,6 +371,7 @@ Here are the permissions needed for each command. Only include statements you ne
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
+                "s3:GetObjectAcl",
                 "s3:PutObjectAcl"
             ],
             "Resource": [
