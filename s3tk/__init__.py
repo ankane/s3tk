@@ -151,17 +151,20 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
         return 'error'
 
 
+def determine_mode(acl):
+    owner = acl.owner
+    grants = acl.grants
+    non_owner_grants = [grant for grant in grants if not (grant['Grantee'].get('ID') == owner['ID'] and grant['Permission'] == 'FULL_CONTROL')]
+
+    # TODO bucket-owner-read and bucket-owner-full-control
+    return next((ca['acl'] for ca in canned_acls if ca['grants'] == non_owner_grants), 'custom')
+
+
 def scan_object(bucket_name, key):
     obj = s3.Object(bucket_name, key)
 
     try:
-        acl = obj.Acl()
-        owner = acl.owner
-        grants = acl.grants
-        non_owner_grants = [grant for grant in grants if not (grant['Grantee'].get('ID') == owner['ID'] and grant['Permission'] == 'FULL_CONTROL')]
-
-        # TODO bucket-owner-read and bucket-owner-full-control
-        mode = next((ca['acl'] for ca in canned_acls if ca['grants'] == non_owner_grants), 'custom')
+        mode = determine_mode(obj.Acl())
 
         if mode == 'private':
             puts(obj.key + ' ' + colored.green(mode))
@@ -178,11 +181,17 @@ def reset_object(bucket_name, key, dry_run, acl):
     obj = s3.Object(bucket_name, key)
 
     try:
-        if dry_run:
+        obj_acl = obj.Acl()
+        mode = determine_mode(obj_acl)
+
+        if mode == acl:
+            puts(obj.key + ' ' + colored.green('ACL already ' + acl))
+            return 'ACL already ' + acl
+        elif dry_run:
             puts(obj.key + ' ' + colored.yellow('ACL to be updated to ' + acl))
             return 'ACL to be updated to ' + acl
         else:
-            obj.Acl().put(ACL=acl)
+            obj_acl.put(ACL=acl)
             puts(obj.key + ' ' + colored.blue('ACL updated to ' + acl))
             return 'ACL updated to ' + acl
 

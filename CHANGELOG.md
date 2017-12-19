@@ -2,6 +2,7 @@
 
 - Added `delete-unencrypted-versions` command
 - Added `--acl` option to `reset-object-acl` command
+- Added check for existing object ACL before reset
 
 ## 0.1.7
 
