@@ -3,6 +3,7 @@
 - Added `delete-unencrypted-versions` command
 - Added `--acl` option to `reset-object-acl` command
 - Added check for existing object ACL before reset
+- Fixed issue with unicode keys in Python 2
 
 ## 0.1.7
 

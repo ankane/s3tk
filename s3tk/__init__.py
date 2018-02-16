@@ -53,6 +53,13 @@ def abort(message):
     sys.exit(1)
 
 
+def unicode_key(key):
+    if sys.version_info[0] < 3 and isinstance(key, unicode):
+        return key.encode('utf-8')
+    else:
+        return key
+
+
 def perform(check):
     check.perform()
 
@@ -101,6 +108,7 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
 
 def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
     obj = s3.Object(bucket_name, key)
+    str_key = unicode_key(key)
 
     try:
         if customer_key:
@@ -115,11 +123,11 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
             encrypted = obj.server_side_encryption == 'AES256'
 
         if encrypted:
-            puts(obj.key + ' ' + colored.green('already encrypted'))
+            puts(str_key + ' ' + colored.green('already encrypted'))
             return 'already encrypted'
         else:
             if dry_run:
-                puts(obj.key + ' ' + colored.yellow('to be encrypted'))
+                puts(str_key + ' ' + colored.yellow('to be encrypted'))
                 return 'to be encrypted'
             else:
                 copy_source = {'Bucket': bucket_name, 'Key': obj.key}
@@ -143,11 +151,11 @@ def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
                         ServerSideEncryption='AES256'
                     )
 
-                puts(obj.key + ' ' + colored.blue('just encrypted'))
+                puts(str_key + ' ' + colored.blue('just encrypted'))
                 return 'just encrypted'
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        puts(obj.key + ' ' + colored.red(str(e)))
+        puts(str_key + ' ' + colored.red(str(e)))
         return 'error'
 
 
@@ -162,41 +170,43 @@ def determine_mode(acl):
 
 def scan_object(bucket_name, key):
     obj = s3.Object(bucket_name, key)
+    str_key = unicode_key(key)
 
     try:
         mode = determine_mode(obj.Acl())
 
         if mode == 'private':
-            puts(obj.key + ' ' + colored.green(mode))
+            puts(str_key + ' ' + colored.green(mode))
         else:
-            puts(obj.key + ' ' + colored.yellow(mode))
+            puts(str_key + ' ' + colored.yellow(mode))
 
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        puts(obj.key + ' ' + colored.red(str(e)))
+        puts(str_key + ' ' + colored.red(str(e)))
         return 'error'
 
 
 def reset_object(bucket_name, key, dry_run, acl):
     obj = s3.Object(bucket_name, key)
+    str_key = unicode_key(key)
 
     try:
         obj_acl = obj.Acl()
         mode = determine_mode(obj_acl)
 
         if mode == acl:
-            puts(obj.key + ' ' + colored.green('ACL already ' + acl))
+            puts(str_key + ' ' + colored.green('ACL already ' + acl))
             return 'ACL already ' + acl
         elif dry_run:
-            puts(obj.key + ' ' + colored.yellow('ACL to be updated to ' + acl))
+            puts(str_key + ' ' + colored.yellow('ACL to be updated to ' + acl))
             return 'ACL to be updated to ' + acl
         else:
             obj_acl.put(ACL=acl)
-            puts(obj.key + ' ' + colored.blue('ACL updated to ' + acl))
+            puts(str_key + ' ' + colored.blue('ACL updated to ' + acl))
             return 'ACL updated to ' + acl
 
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
-        puts(obj.key + ' ' + colored.red(str(e)))
+        puts(str_key + ' ' + colored.red(str(e)))
         return 'error'
 
 
