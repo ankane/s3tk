@@ -1,4 +1,4 @@
-## 0.1.8 [unreleased]
+## 0.1.8
 
 - Added `delete-unencrypted-versions` command
 - Added `--acl` option to `reset-object-acl` command
