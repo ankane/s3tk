@@ -255,7 +255,7 @@ A few notes about encryption:
 - objects will lose any custom ACL
 - we recommend setting a bucket policy to deny unencrypted uploads - see [bucket policies](#bucket-policies) for instructions
 
-### Delete Unencrypted Versions [master]
+### Delete Unencrypted Versions
 
 Delete all unencrypted versions of objects in a bucket
 
