@@ -397,6 +397,7 @@ Here are the permissions needed for each command. Only include statements you ne
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucketVersions",
+                "s3:GetObjectVersion",
                 "s3:DeleteObjectVersion"
             ],
             "Resource": [
