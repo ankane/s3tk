@@ -176,7 +176,7 @@ Use the `--dry-run` flag to test
 
 ### Enable Default Encryption
 
-Enable [default encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html) on all buckets
+Enable [default encryption](https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html) on all buckets
 
 ```sh
 s3tk enable-default-encryption
@@ -228,19 +228,19 @@ Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 
 ### Encrypt
 
-Encrypt all objects in a bucket with [server-side encryption](http://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html)
+Encrypt all objects in a bucket with [server-side encryption](https://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html)
 
 ```sh
 s3tk encrypt my-bucket
 ```
 
-Use [S3-managed keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServerSideEncryption.html) by default. For [KMS-managed keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html), use:
+Use [S3-managed keys](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingServerSideEncryption.html) by default. For [KMS-managed keys](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html), use:
 
 ```sh
 s3tk encrypt my-bucket --kms-key-id arn:aws:kms:...
 ```
 
-For [customer-provided keys](http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html), use:
+For [customer-provided keys](https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html), use:
 
 ```sh
 s3tk encrypt my-bucket --customer-key secret-key
@@ -281,7 +281,7 @@ Otherwise, you may be susceptible to [subdomain takeover](https://hackerone.com/
 
 ## Credentials
 
-Credentials can be specified in `~/.aws/credentials` or with environment variables. See [this guide](http://boto3.readthedocs.io/en/latest/guide/configuration.html) for an explanation of environment variables.
+Credentials can be specified in `~/.aws/credentials` or with environment variables. See [this guide](https://boto3.readthedocs.io/en/latest/guide/configuration.html) for an explanation of environment variables.
 
 ## IAM Policies
 
