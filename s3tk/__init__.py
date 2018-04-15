@@ -382,9 +382,10 @@ def cli():
 @click.option('--log-prefix', help='Check log prefix')
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
-@click.option('--default-encryption', is_flag=True, help='Include default encryption check')
+@click.option('--skip-default-encryption', is_flag=True, help='Skip default encryption check')
+@click.option('--default-encryption', is_flag=True) # no op, can't hide from help until click 7 released
 @click.option('--sns-topic', help='Send SNS notification for failures')
-def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, default_encryption=False, sns_topic=None):
+def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, skip_default_encryption=False, default_encryption=True, sns_topic=None):
     checks = []
     for bucket in fetch_buckets(buckets):
         puts(bucket.name)
@@ -399,7 +400,7 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
         if not skip_versioning:
             checks.append(perform(VersioningCheck(bucket)))
 
-        if default_encryption:
+        if not skip_default_encryption:
             checks.append(perform(EncryptionCheck(bucket)))
 
         puts()

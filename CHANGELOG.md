@@ -1,3 +1,7 @@
+## 0.2.0 [unreleased]
+
+- Scan default encryption by default
+
 ## 0.1.8
 
 - Added `delete-unencrypted-versions` command
