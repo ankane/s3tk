@@ -65,11 +65,11 @@ def perform(check):
 
     with indent(2):
         if check.status == 'passed':
-            puts(colored.green(check.name + ' ' + check.pass_message))
+            puts(colored.green('✔ ' + check.name + ' ' + check.pass_message))
         elif check.status == 'failed':
-            puts(colored.red(check.name + ' ' + check.fail_message))
+            puts(colored.red('✘ ' + check.name + ' ' + check.fail_message))
         else:
-            puts(colored.red(check.name + ' access denied'))
+            puts(colored.red('✘ ' + check.name + ' access denied'))
 
     return check
 
