@@ -6,9 +6,9 @@ A security toolkit for Amazon S3
 >
 > &mdash; The Register, 12 Jul 2017
 
-Don’t be the next [big](https://www.theregister.co.uk/2017/07/12/14m_verizon_customers_details_out/) [data](https://www.theregister.co.uk/2017/08/17/chicago_voter_leak/) [leak](https://www.theregister.co.uk/2017/09/05/twc_loses_4m_customer_records/) [this](https://www.theregister.co.uk/2017/07/18/dow_jones_index_of_customers_not_prices_leaks_from_aws_repo/) [year](https://www.theregister.co.uk/2017/08/22/open_aws_s3_bucket_leaked_hotel_booking_service_data_says_kromtech/)
+Don’t be [the](https://www.theregister.co.uk/2017/07/12/14m_verizon_customers_details_out/)... [next](https://www.theregister.co.uk/2017/08/17/chicago_voter_leak/)... [big](https://www.theregister.co.uk/2017/09/05/twc_loses_4m_customer_records/)... [data](https://www.theregister.co.uk/2017/07/18/dow_jones_index_of_customers_not_prices_leaks_from_aws_repo/)... [leak](https://www.theregister.co.uk/2017/08/22/open_aws_s3_bucket_leaked_hotel_booking_service_data_says_kromtech/)
 
-![Screenshot](https://gist.githubusercontent.com/ankane/13a9230353c78c0d5c35fd9319a23d98/raw/82889dbc9482246bab8941e6adf8195cbc65e99c/console.gif)
+![Screenshot](https://gist.githubusercontent.com/ankane/13a9230353c78c0d5c35fd9319a23d98/raw/434b9c54bff9d41c398aa3b57f0d0494217ef7fa/console2.gif)
 
 :tangerine: Battle-tested at [Instacart](https://www.instacart.com/opensource)
 
@@ -39,6 +39,7 @@ Scan your buckets for:
 - policy open to public
 - logging enabled
 - versioning enabled
+- default encryption enabled
 
 ```sh
 s3tk scan
@@ -62,16 +63,10 @@ Confirm correct log bucket(s) and prefix
 s3tk scan --log-bucket my-s3-logs --log-bucket other-region-logs --log-prefix "{bucket}/"
 ```
 
-Skip logging or versioning
+Skip logging, versioning, or default encryption
 
 ```sh
-s3tk scan --skip-logging --skip-versioning
-```
-
-Include default encryption
-
-```sh
-s3tk scan --default-encryption
+s3tk scan --skip-logging --skip-versioning --skip-default-encryption
 ```
 
 Get email notifications of failures (via SNS)
@@ -108,18 +103,6 @@ Only private uploads
 
 ```sh
 s3tk set-policy my-bucket --no-object-acl
-```
-
-Require encryption
-
-```sh
-s3tk set-policy my-bucket --encryption
-```
-
-Use multiple together
-
-```sh
-s3tk set-policy my-bucket --no-object-acl --encryption
 ```
 
 ### Delete Policy
@@ -250,10 +233,7 @@ Use the `--dry-run` flag to test
 
 Specify certain objects the same way as [scan-object-acl](#scan-object-acl)
 
-A few notes about encryption:
-
-- objects will lose any custom ACL
-- we recommend setting a bucket policy to deny unencrypted uploads - see [bucket policies](#bucket-policies) for instructions
+**Note:** Objects will lose any custom ACL
 
 ### Delete Unencrypted Versions
 
@@ -557,31 +537,6 @@ Only private uploads
     ]
 }
 ```
-
-Only encrypted uploads (S3-managed keys)
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::my-bucket/*",
-      "Condition": {
-        "StringNotEquals": {
-          "s3:x-amz-server-side-encryption": "AES256"
-        }
-      }
-    }
-  ]
-}
-```
-
-For KMS-managed keys, replace `AES256` with `aws:kms` above.
-
-There is currently no way to do this with customer-provided keys.
 
 ## Notes
 

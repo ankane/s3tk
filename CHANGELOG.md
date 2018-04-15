@@ -1,6 +1,8 @@
-## 0.2.0 [unreleased]
+## 0.2.0
 
 - Scan default encryption by default
+- More greppable output
+- Performance optimization for single objects
 
 ## 0.1.8
 
