@@ -260,6 +260,10 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
         return Parallel(n_jobs=24)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
+
+        if only and not '*' in only:
+            objects = [s3.Object(bucket, only)]
+
         return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
