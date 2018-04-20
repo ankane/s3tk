@@ -577,19 +577,19 @@ pip install git+git://github.com/ankane/s3tk.git --upgrade
 Run:
 
 ```sh
-docker run -i --name s3tk ankane/s3tk aws configure
+docker run -t ankane/s3tk aws configure
 ```
 
 Commit your credentials:
 
 ```sh
-docker commit s3tk s3tk:creds
+docker commit $(docker ps -l -q) s3tk:creds
 ```
 
 And run:
 
 ```sh
-docker run -i s3tk:creds s3tk scan
+docker run -t s3tk:creds s3tk scan
 ```
 
 ## History
