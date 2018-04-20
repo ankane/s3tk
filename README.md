@@ -583,13 +583,13 @@ docker run -it ankane/s3tk aws configure
 Commit your credentials:
 
 ```sh
-docker commit $(docker ps -l -q) s3tk:creds
+docker commit $(docker ps -l -q) my-s3tk
 ```
 
 And run:
 
 ```sh
-docker run -it s3tk:creds s3tk scan
+docker run -it my-s3tk s3tk scan
 ```
 
 ## History
