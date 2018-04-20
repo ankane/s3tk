@@ -5,7 +5,7 @@ import s3tk
 import botocore
 try:
     s3tk.cli()
-except botocore.exceptions.BotoCoreError as e:
+except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
     s3tk.abort(str(e))
 except KeyboardInterrupt:
     sys.exit(1)
