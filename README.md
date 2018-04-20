@@ -572,6 +572,26 @@ To use master, run:
 pip install git+git://github.com/ankane/s3tk.git --upgrade
 ```
 
+## Docker
+
+Run:
+
+```sh
+docker run -i --name s3tk ankane/s3tk aws configure
+```
+
+Commit your credentials:
+
+```sh
+docker commit s3tk s3tk:creds
+```
+
+And run:
+
+```sh
+docker run -i s3tk:creds s3tk scan
+```
+
 ## History
 
 View the [changelog](https://github.com/ankane/s3tk/blob/master/CHANGELOG.md)
