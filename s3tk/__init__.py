@@ -65,11 +65,11 @@ def perform(check):
 
     with indent(2):
         if check.status == 'passed':
-            puts(colored.green('✔ ' + check.name + ' ' + check.pass_message))
+            puts(colored.green(check.name + ' ' + check.pass_message))
         elif check.status == 'failed':
-            puts(colored.red('✘ ' + check.name + ' ' + check.fail_message))
+            puts(colored.red(check.name + ' ' + check.fail_message))
         else:
-            puts(colored.red('✘ ' + check.name + ' access denied'))
+            puts(colored.red(check.name + ' access denied'))
 
     return check
 
@@ -171,14 +171,15 @@ def determine_mode(acl):
 def scan_object(bucket_name, key):
     obj = s3.Object(bucket_name, key)
     str_key = unicode_key(key)
-
     try:
         mode = determine_mode(obj.Acl())
-
+        
+	'''
         if mode == 'private':
             puts(str_key + ' ' + colored.green(mode))
         else:
             puts(str_key + ' ' + colored.yellow(mode))
+        '''
 
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
@@ -363,13 +364,14 @@ def print_policy(policy):
             puts(colored.yellow("None"))
 
 
-def summarize(values):
+def summarize(values, bucket):
     summary = Counter(values)
-
+    
     puts()
-    puts("Summary")
     for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
+        if k == "public-read":
+            puts("Bucket:" + colored.red(bucket))
+            puts(k + ': ' + str(v))
 
 
 @click.group()
@@ -486,7 +488,7 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
 def scan_object_acl(bucket, only=None, _except=None):
-    summarize(parallelize(bucket, only, _except, scan_object))
+    summarize(parallelize(bucket, only, _except, scan_object), bucket)
 
 
 @cli.command(name='reset-object-acl')
