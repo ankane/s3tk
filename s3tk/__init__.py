@@ -174,13 +174,10 @@ def scan_object(bucket_name, key):
     try:
         mode = determine_mode(obj.Acl())
         
-	'''
-        if mode == 'private':
-            puts(str_key + ' ' + colored.green(mode))
-        else:
-            puts(str_key + ' ' + colored.yellow(mode))
-        '''
-
+	
+        if (mode == 'public-read') or (mode == 'public-read-write'):
+            puts(str_key + ' ' + colored.red(mode))
+        
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(str_key + ' ' + colored.red(str(e)))
@@ -369,7 +366,7 @@ def summarize(values, bucket):
     
     puts()
     for k, v in summary.most_common():
-        if k == "public-read":
+        if (k == "public-read") or (k == "public-write"):
             puts("Bucket:" + colored.red(bucket))
             puts(k + ': ' + str(v))
 
