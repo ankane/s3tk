@@ -490,7 +490,7 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 
 
 @cli.command(name='scan-object-acl')
-@click.argument('bucket', default="all")
+@click.argument('bucket', required=False)
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
 @click.option('--scan-all', is_flag=True, help='All buckets')
@@ -506,11 +506,19 @@ def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None):
             puts(bucket.name)
             total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name)
         puts("Total: "+str(total))
-    elif only or _except or bucket!="all":
+    elif only or _except or bucket is not None:
         total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket)   
         puts("Total: "+str(total))
     else:
-        puts("Error: Missing argument [OPTIONS] BUCKET")
+        print_help_msg(scan_object_acl)
+     
+       
+def print_help_msg(command):
+    with click.Context(command) as ctx:
+        ctx.info_name = "s3tk scan-object-acl"
+        ctx.parent = None
+        click.echo(command.get_help(ctx))
+
         
 
 @cli.command(name='reset-object-acl')
