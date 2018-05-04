@@ -9,6 +9,7 @@ import click
 from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck, EncryptionCheck
+import pprint
 
 __version__ = '0.2.0'
 
@@ -43,6 +44,9 @@ canned_acls = [
         ]
     }
 ]
+
+total = 0
+total_val = 0
 
 def notice(message):
     puts(colored.yellow(message))
@@ -363,13 +367,18 @@ def print_policy(policy):
 
 def summarize(values, bucket):
     summary = Counter(values)
-    
+    total = Counter(values) 
     puts()
     for k, v in summary.most_common():
-        if (k == "public-read") or (k == "public-write"):
+        if (k == "public-read") or (k == "public-read-write"):
             puts("Bucket:" + colored.red(bucket))
             puts(k + ': ' + str(v))
 
+    total_val = 0
+    for k, v in total.most_common():
+        total_val = total_val + v
+
+    return total_val
 
 @click.group()
 @click.version_option(version=__version__)
@@ -481,12 +490,28 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 
 
 @cli.command(name='scan-object-acl')
-@click.argument('bucket')
+@click.argument('bucket', default="all")
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
-def scan_object_acl(bucket, only=None, _except=None):
-    summarize(parallelize(bucket, only, _except, scan_object), bucket)
+@click.option('--scan-all', is_flag=True, help='All buckets')
 
+
+def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None):
+    
+    buckets = ""
+    total = 0
+    if scan_all:
+        only = "*"
+        for bucket in fetch_buckets(buckets):
+            puts(bucket.name)
+            total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name)
+        puts("Total: "+str(total))
+    elif only or _except or bucket!="all":
+        total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket)   
+        puts("Total: "+str(total))
+    else:
+        puts("Error: Missing argument [OPTIONS] BUCKET")
+        
 
 @cli.command(name='reset-object-acl')
 @click.argument('bucket')
