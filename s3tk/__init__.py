@@ -177,11 +177,14 @@ def scan_object(bucket_name, key):
     str_key = unicode_key(key)
     try:
         mode = determine_mode(obj.Acl())
-        
-	
-        if (mode == 'public-read') or (mode == 'public-read-write'):
-            puts(str_key + ' ' + colored.red(mode))
-        
+        if type == "public":
+
+            if (mode == 'public-read') or (mode == 'public-read-write'):
+                puts(str_key + ' ' + colored.red(mode))
+        else:
+                puts(str_key + ' ' + colored.red(mode))
+
+
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(str_key + ' ' + colored.red(str(e)))
@@ -365,14 +368,22 @@ def print_policy(policy):
             puts(colored.yellow("None"))
 
 
-def summarize(values, bucket):
+def summarize(values, bucket, type):
     summary = Counter(values)
     total = Counter(values) 
     puts()
-    for k, v in summary.most_common():
-        if (k == "public-read") or (k == "public-read-write"):
-            puts("Bucket:" + colored.red(bucket))
-            puts(k + ': ' + str(v))
+
+    if type=="public":
+
+        for k, v in summary.most_common():
+            if (k == "public-read") or (k == "public-read-write"):
+                puts("Bucket:" + colored.red(bucket))
+                puts(k + ': ' + str(v))
+
+    else:
+        for k, v in summary.most_common():
+                puts("Bucket:" + bucket)
+                puts(k + ': ' + str(v))
 
     total_val = 0
     for k, v in total.most_common():
@@ -493,21 +504,35 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 @click.argument('bucket', required=False)
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
-@click.option('--scan-all', is_flag=True, help='All buckets')
+@click.option('--scan-all', is_flag=True, help='Scan and show all public buckets')
+@click.option('--also-private', is_flag=True, help='Also private')
 
 
-def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None):
+def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None, also_private=None):
     
     buckets = ""
     total = 0
     if scan_all:
-        only = "*"
-        for bucket in fetch_buckets(buckets):
-            puts(bucket.name)
-            total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name)
-        puts("Total: "+str(total))
+        if also_private:
+            only = "*"
+            for bucket in fetch_buckets(buckets):
+                puts(bucket.name)
+                total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "private" )
+            puts("Total: "+str(total))
+        else:
+            only = "*"
+            for bucket in fetch_buckets(buckets):
+                puts(bucket.name)
+                total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "public")
+            puts("Total: " + str(total))
+
+
     elif only or _except or bucket is not None:
-        total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket)   
+        if also_private:
+            total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket, "private")
+        else:
+            total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket, "public")
+
         puts("Total: "+str(total))
     else:
         print_help_msg(scan_object_acl)
