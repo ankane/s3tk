@@ -515,7 +515,7 @@ def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None):
        
 def print_help_msg(command):
     with click.Context(command) as ctx:
-        ctx.info_name = "s3tk scan-object-acl"
+        ctx.info_name = "s3tk " + ctx.command.name
         ctx.parent = None
         click.echo(command.get_help(ctx))
 
