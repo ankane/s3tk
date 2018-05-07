@@ -54,7 +54,7 @@ def notice(message):
 
 def abort(message):
     puts(colored.red(message))
-    sys.exit(1)
+    #sys.exit(1)
 
 
 def unicode_key(key):
