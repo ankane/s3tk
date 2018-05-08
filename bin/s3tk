@@ -7,5 +7,6 @@ try:
     s3tk.cli()
 except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
     s3tk.abort(str(e))
+    pass
 except KeyboardInterrupt:
     sys.exit(1)
