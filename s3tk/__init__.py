@@ -184,7 +184,7 @@ def scan_object(bucket_name, key):
 
             if (mode == 'public-read') or (mode == 'public-read-write'):
                 puts(str_key + ' ' + colored.red(mode))
-        else:
+            else:
                 puts(str_key + ' ' + colored.red(mode))
 
 
