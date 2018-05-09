@@ -173,8 +173,11 @@ def determine_mode(acl):
 
 
 def scan_object(bucket_name, key):
-    obj = s3.Object(bucket_name, key)
-    str_key = unicode_key(key)
+    try:
+        obj = s3.Object(bucket_name, key)
+        str_key = unicode_key(key)
+    except:
+        return 'error'
     try:
         mode = determine_mode(obj.Acl())
         if type == "public":
@@ -188,7 +191,7 @@ def scan_object(bucket_name, key):
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
         puts(str_key + ' ' + colored.red(str(e)))
-        return 'error'
+        return 'non-avail'
 
 
 def reset_object(bucket_name, key, dry_run, acl):
@@ -262,14 +265,14 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
     if versions:
         object_versions = bucket.object_versions.filter(Prefix=prefix) if prefix else bucket.object_versions.all()
         # delete markers have no size
-        return Parallel(n_jobs=-1)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
+        return Parallel(n_jobs=1)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
         if only and not '*' in only:
             objects = [s3.Object(bucket, only)]
 
-        return Parallel(n_jobs=-1)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+        return Parallel(n_jobs=1)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):
@@ -512,18 +515,28 @@ def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None, also_pr
     
     buckets = ""
     total = 0
+    
+      
     if scan_all:
         if also_private:
             only = "*"
             for bucket in fetch_buckets(buckets):
                 puts(bucket.name)
-                total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "private" )
+                try:
+                    total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "private" )
+                except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+                    abort(str(e))
+                    pass
             puts("Total: "+str(total))
         else:
             only = "*"
             for bucket in fetch_buckets(buckets):
                 puts(bucket.name)
-                total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "public")
+                try:
+                    total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "public")
+                except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+                    abort(str(e))
+                    pass
             puts("Total: " + str(total))
 
 
