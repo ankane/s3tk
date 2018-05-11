@@ -9,6 +9,7 @@ import click
 from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck, EncryptionCheck
+import pprint
 
 __version__ = '0.2.0'
 
@@ -44,13 +45,16 @@ canned_acls = [
     }
 ]
 
+total = 0
+total_val = 0
+
 def notice(message):
     puts(colored.yellow(message))
 
 
 def abort(message):
     puts(colored.red(message))
-    sys.exit(1)
+    #sys.exit(1)
 
 
 def unicode_key(key):
@@ -65,11 +69,11 @@ def perform(check):
 
     with indent(2):
         if check.status == 'passed':
-            puts(colored.green('✔ ' + check.name + ' ' + check.pass_message))
+            puts(colored.green(check.name + ' ' + check.pass_message))
         elif check.status == 'failed':
-            puts(colored.red('✘ ' + check.name + ' ' + check.fail_message))
+            puts(colored.red(check.name + ' ' + check.fail_message))
         else:
-            puts(colored.red('✘ ' + check.name + ' access denied'))
+            puts(colored.red(check.name + ' access denied'))
 
     return check
 
@@ -169,16 +173,18 @@ def determine_mode(acl):
 
 
 def scan_object(bucket_name, key):
-    obj = s3.Object(bucket_name, key)
-    str_key = unicode_key(key)
-
+    try:
+        obj = s3.Object(bucket_name, key)
+        str_key = unicode_key(key)
+    except:
+        return 'error'
     try:
         mode = determine_mode(obj.Acl())
 
-        if mode == 'private':
-            puts(str_key + ' ' + colored.green(mode))
-        else:
-            puts(str_key + ' ' + colored.yellow(mode))
+
+        if (mode == 'public-read') or (mode == 'public-read-write'):
+            puts(str_key + ' ' + colored.red(mode))
+
 
         return mode
     except (botocore.exceptions.ClientError, botocore.exceptions.NoCredentialsError) as e:
@@ -257,14 +263,14 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
     if versions:
         object_versions = bucket.object_versions.filter(Prefix=prefix) if prefix else bucket.object_versions.all()
         # delete markers have no size
-        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
+        return Parallel(n_jobs=-1)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
         if only and not '*' in only:
             objects = [s3.Object(bucket, only)]
 
-        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+        return Parallel(n_jobs=-1)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):
@@ -363,14 +369,28 @@ def print_policy(policy):
             puts(colored.yellow("None"))
 
 
-def summarize(values):
+def summarize(values, bucket, type):
     summary = Counter(values)
-
+    total = Counter(values) 
     puts()
-    puts("Summary")
-    for k, v in summary.most_common():
-        puts(k + ': ' + str(v))
 
+    if type=="public":
+
+        for k, v in summary.most_common():
+            if (k == "public-read") or (k == "public-read-write"):
+                puts("Bucket:" + colored.red(bucket))
+                puts(k + ': ' + str(v))
+
+    else:
+        for k, v in summary.most_common():
+                puts("Bucket:" + bucket)
+                puts(k + ': ' + str(v))
+
+    total_val = 0
+    for k, v in total.most_common():
+        total_val = total_val + v
+
+    return total_val
 
 @click.group()
 @click.version_option(version=__version__)
@@ -482,12 +502,60 @@ def encrypt(bucket, only=None, _except=None, dry_run=False, kms_key_id=None, cus
 
 
 @cli.command(name='scan-object-acl')
-@click.argument('bucket')
+@click.argument('bucket', required=False)
 @click.option('--only', help='Only certain objects')
 @click.option('--except', '_except', help='Except certain objects')
-def scan_object_acl(bucket, only=None, _except=None):
-    summarize(parallelize(bucket, only, _except, scan_object))
+@click.option('--scan-all', is_flag=True, help='Scan and show all public buckets')
+@click.option('--also-private', is_flag=True, help='Also private')
 
+
+def scan_object_acl(bucket=None, only=None, _except=None, scan_all=None, also_private=None):
+    
+    buckets = ""
+    total = 0
+    
+      
+    if scan_all:
+        if also_private:
+            only = "*"
+            for bucket in fetch_buckets(buckets):
+                puts(bucket.name)
+                try:
+                    total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "private" )
+                except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+                    abort(str(e))
+                    pass
+            puts("Total: "+str(total))
+        else:
+            only = "*"
+            for bucket in fetch_buckets(buckets):
+                puts(bucket.name)
+                try:
+                    total = total + summarize(parallelize(bucket.name, only, _except, scan_object), bucket.name, "public")
+                except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+                    abort(str(e))
+                    pass
+            puts("Total: " + str(total))
+
+
+    elif only or _except or bucket is not None:
+        if also_private:
+            total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket, "private")
+        else:
+            total = total + summarize(parallelize(bucket, only, _except, scan_object), bucket, "public")
+
+        puts("Total: "+str(total))
+    else:
+        print_help_msg(scan_object_acl)
+     
+       
+def print_help_msg(command):
+    with click.Context(command) as ctx:
+        ctx.info_name = "s3tk " + ctx.command.name
+        ctx.parent = None
+        click.echo(command.get_help(ctx))
+
+        
 
 @cli.command(name='reset-object-acl')
 @click.argument('bucket')
