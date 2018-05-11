@@ -181,12 +181,9 @@ def scan_object(bucket_name, key):
     try:
         mode = determine_mode(obj.Acl())
 
-        if type == "public":
 
-            if (mode == 'public-read') or (mode == 'public-read-write'):
-                puts(str_key + ' ' + colored.red(mode))
-            else:
-                puts(str_key + ' ' + colored.red(mode))
+        if (mode == 'public-read') or (mode == 'public-read-write'):
+            puts(str_key + ' ' + colored.red(mode))
 
 
         return mode
