@@ -263,6 +263,12 @@ Otherwise, you may be susceptible to [subdomain takeover](https://hackerone.com/
 
 Credentials can be specified in `~/.aws/credentials` or with environment variables. See [this guide](https://boto3.readthedocs.io/en/latest/guide/configuration.html) for an explanation of environment variables.
 
+You can specify a profile to use with:
+
+```sh
+AWS_PROFILE=your-profile s3tk
+```
+
 ## IAM Policies
 
 Here are the permissions needed for each command. Only include statements you need.
