@@ -46,6 +46,14 @@ canned_acls = [
 
 cached_s3 = None
 
+def s3():
+    # memoize
+    global cached_s3
+    if cached_s3 is None:
+        cached_s3 = boto3.resource('s3')
+    return cached_s3
+
+
 def notice(message):
     puts(colored.yellow(message))
 
@@ -372,14 +380,6 @@ def summarize(values):
     puts("Summary")
     for k, v in summary.most_common():
         puts(k + ': ' + str(v))
-
-
-def s3():
-    # memoize
-    global cached_s3
-    if cached_s3 is None:
-        cached_s3 = boto3.resource('s3')
-    return cached_s3
 
 
 @click.group()
