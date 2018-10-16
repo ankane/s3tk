@@ -44,6 +44,8 @@ canned_acls = [
     }
 ]
 
+cached_s3 = None
+
 def notice(message):
     puts(colored.yellow(message))
 
@@ -77,11 +79,11 @@ def perform(check):
 def fetch_buckets(buckets):
     if buckets:
         if any('*' in b for b in buckets):
-            return [b for b in s3.buckets.all() if any(fnmatch.fnmatch(b.name, bn) for bn in buckets)]
+            return [b for b in s3().buckets.all() if any(fnmatch.fnmatch(b.name, bn) for bn in buckets)]
         else:
-            return [s3.Bucket(bn) for bn in buckets]
+            return [s3().Bucket(bn) for bn in buckets]
     else:
-        return s3.buckets.all()
+        return s3().buckets.all()
 
 
 def fix_check(klass, buckets, dry_run, fix_args={}):
@@ -107,7 +109,7 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
 
 
 def encrypt_object(bucket_name, key, dry_run, kms_key_id, customer_key):
-    obj = s3.Object(bucket_name, key)
+    obj = s3().Object(bucket_name, key)
     str_key = unicode_key(key)
 
     try:
@@ -169,7 +171,7 @@ def determine_mode(acl):
 
 
 def scan_object(bucket_name, key):
-    obj = s3.Object(bucket_name, key)
+    obj = s3().Object(bucket_name, key)
     str_key = unicode_key(key)
 
     try:
@@ -187,7 +189,7 @@ def scan_object(bucket_name, key):
 
 
 def reset_object(bucket_name, key, dry_run, acl):
-    obj = s3.Object(bucket_name, key)
+    obj = s3().Object(bucket_name, key)
     str_key = unicode_key(key)
 
     try:
@@ -211,7 +213,7 @@ def reset_object(bucket_name, key, dry_run, acl):
 
 
 def delete_unencrypted_version(bucket_name, key, id, dry_run):
-    object_version = s3.ObjectVersion(bucket_name, key, id)
+    object_version = s3().ObjectVersion(bucket_name, key, id)
 
     try:
         obj = object_version.get()
@@ -244,7 +246,7 @@ def object_matches(key, only, _except):
 
 
 def parallelize(bucket, only, _except, fn, args=(), versions=False):
-    bucket = s3.Bucket(bucket)
+    bucket = s3().Bucket(bucket)
 
     # use prefix for performance
     prefix = None
@@ -257,14 +259,14 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
     if versions:
         object_versions = bucket.object_versions.filter(Prefix=prefix) if prefix else bucket.object_versions.all()
         # delete markers have no size
-        return Parallel(n_jobs=24, require='sharedmem')(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
+        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
         if only and not '*' in only:
-            objects = [s3.Object(bucket, only)]
+            objects = [s3().Object(bucket, only)]
 
-        return Parallel(n_jobs=24, require='sharedmem')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):
@@ -372,11 +374,17 @@ def summarize(values):
         puts(k + ': ' + str(v))
 
 
+def s3():
+    # memoize
+    global cached_s3
+    if cached_s3 is None:
+        cached_s3 = boto3.resource('s3')
+    return cached_s3
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
-    global s3
-    s3 = boto3.resource('s3')
     pass
 
 
@@ -423,7 +431,7 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
 @cli.command(name='scan-dns')
 def scan_dns():
-    buckets = set([b.name for b in s3.buckets.all()])
+    buckets = set([b.name for b in s3().buckets.all()])
     found_buckets = set()
 
     client = boto3.client('route53')
@@ -559,7 +567,7 @@ def list_policy(buckets, named=False):
 @click.option('--encryption', is_flag=True, help='Require encryption')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def set_policy(bucket, public=False, no_object_acl=False, public_uploads=False, no_uploads=False, encryption=False, dry_run=False):
-    bucket = s3.Bucket(bucket)
+    bucket = s3().Bucket(bucket)
     bucket_policy = bucket.Policy()
 
     statements = []
@@ -599,7 +607,7 @@ def set_policy(bucket, public=False, no_object_acl=False, public_uploads=False, 
 @click.option('--encryption/--no-encryption', default=None, help='Require encryption')
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def update_policy(bucket, encryption=None, dry_run=False):
-    bucket = s3.Bucket(bucket)
+    bucket = s3().Bucket(bucket)
 
     policy = fetch_policy(bucket)
     if not policy:
@@ -641,5 +649,5 @@ def update_policy(bucket, encryption=None, dry_run=False):
 @cli.command(name='delete-policy')
 @click.argument('bucket')
 def delete_policy(bucket):
-    s3.Bucket(bucket).Policy().delete()
+    s3().Bucket(bucket).Policy().delete()
     puts('Policy deleted')
