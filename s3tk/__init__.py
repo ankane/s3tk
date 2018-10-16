@@ -257,14 +257,14 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
     if versions:
         object_versions = bucket.object_versions.filter(Prefix=prefix) if prefix else bucket.object_versions.all()
         # delete markers have no size
-        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
+        return Parallel(n_jobs=24, require='sharedmem')(delayed(fn)(bucket.name, ov.object_key, ov.id, *args) for ov in object_versions if object_matches(ov.object_key, only, _except) and not ov.is_latest and ov.size is not None)
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
         if only and not '*' in only:
             objects = [s3.Object(bucket, only)]
 
-        return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
+        return Parallel(n_jobs=24, require='sharedmem')(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
 
 
 def public_statement(bucket):

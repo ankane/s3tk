@@ -15,7 +15,7 @@ setup(
         'botocore>=1.7.43',
         'clint',
         'click',
-        'joblib<0.12.0'
+        'joblib'
     ],
     zip_safe=False
 )
