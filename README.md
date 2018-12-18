@@ -575,7 +575,7 @@ pip install s3tk --upgrade
 To use master, run:
 
 ```sh
-pip install git+git://github.com/ankane/s3tk.git --upgrade
+pip install git+https://github.com/ankane/s3tk.git --upgrade
 ```
 
 ## Docker
