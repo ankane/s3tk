@@ -1,4 +1,4 @@
-## 0.2.1
+## 0.2.1 (2018-10-16)
 
 - Fixed error with joblib 0.12
 
@@ -8,7 +8,7 @@
 - More greppable output
 - Performance optimization for single objects
 
-## 0.1.8
+## 0.1.8 (2018-02-16)
 
 - Added `delete-unencrypted-versions` command
 - Added `--acl` option to `reset-object-acl` command
