@@ -567,7 +567,7 @@ Only private uploads
 
 ## Notes
 
-The `set-policy`, `enable-logging`, `enable-versioning`, and `enable-default-encryption` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
+The `set-policy`, `block-public-access`, `enable-logging`, `enable-versioning`, and `enable-default-encryption` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
 
 ```tf
 resource "aws_s3_bucket" "my_bucket" {
@@ -582,6 +582,15 @@ resource "aws_s3_bucket" "my_bucket" {
   versioning {
     enabled = true
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "my_bucket" {
+  bucket = "${aws_s3_bucket.my_bucket.id}"
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 ```
 
