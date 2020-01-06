@@ -461,6 +461,8 @@ def scan_dns():
 @click.argument('buckets', nargs=-1)
 @click.option('--dry-run', is_flag=True, help='Dry run')
 def block_public_access(buckets, dry_run=False):
+    if not buckets:
+        abort('Must specify at least one bucket or wildcard')
     fix_check(PublicAccessCheck, buckets, dry_run)
 
 
