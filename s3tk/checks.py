@@ -59,7 +59,7 @@ class PolicyCheck(Check):
 class PublicAccessCheck(Check):
     name = 'Public access'
     pass_message = 'blocked'
-    fail_message = 'allowed'
+    fail_message = 'not blocked'
 
     def _passed(self):
         response = None

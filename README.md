@@ -37,7 +37,7 @@ Scan your buckets for:
 
 - ACL open to public
 - policy open to public
-- public access allowed [master]
+- public access blocked [master]
 - logging enabled
 - versioning enabled
 - default encryption enabled

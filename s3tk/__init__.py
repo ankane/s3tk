@@ -100,16 +100,16 @@ def fix_check(klass, buckets, dry_run, fix_args={}):
         check.perform()
 
         if check.status == 'passed':
-            message = colored.green('already enabled')
+            message = colored.green('already ' + check.pass_message)
         elif check.status == 'denied':
             message = colored.red('access denied')
         else:
             if dry_run:
-                message = colored.yellow('to be enabled')
+                message = colored.yellow('to be ' + check.pass_message)
             else:
                 try:
                     check.fix(fix_args)
-                    message = colored.blue('just enabled')
+                    message = colored.blue('just ' + check.pass_message)
                 except botocore.exceptions.ClientError as e:
                     message = colored.red(str(e))
 
