@@ -1,3 +1,8 @@
+## 0.3.0 (unreleased)
+
+- Added check for public access allowed
+- Added `block-public-access` command
+
 ## 0.2.1 (2018-10-16)
 
 - Fixed error with joblib 0.12

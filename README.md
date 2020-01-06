@@ -37,6 +37,7 @@ Scan your buckets for:
 
 - ACL open to public
 - policy open to public
+- public access allowed [master]
 - logging enabled
 - versioning enabled
 - default encryption enabled
@@ -111,6 +112,14 @@ Delete policy
 
 ```sh
 s3tk delete-policy my-bucket
+```
+
+### Block Public Access [master]
+
+Block public access
+
+```sh
+s3tk block-public-access my-bucket
 ```
 
 ### Enable Logging
@@ -284,6 +293,7 @@ Here are the permissions needed for each command. Only include statements you ne
                 "s3:ListAllMyBuckets",
                 "s3:GetBucketAcl",
                 "s3:GetBucketPolicy",
+                "s3:GetBucketPublicAccessBlock",
                 "s3:GetBucketLogging",
                 "s3:GetBucketVersioning",
                 "s3:GetEncryptionConfiguration"
@@ -322,6 +332,15 @@ Here are the permissions needed for each command. Only include statements you ne
             "Effect": "Allow",
             "Action": [
                 "s3:DeleteBucketPolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "BlockPublicAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "s3:PutBucketPublicAccessBlock"
             ],
             "Resource": "*"
         },

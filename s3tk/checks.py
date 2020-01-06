@@ -56,6 +56,39 @@ class PolicyCheck(Check):
         return True
 
 
+class PublicAccessCheck(Check):
+    name = 'Public access'
+    pass_message = 'blocked'
+    fail_message = 'allowed'
+
+    def _passed(self):
+        response = None
+
+        try:
+            response = self.bucket.meta.client.get_public_access_block(
+                Bucket=self.bucket.name
+            )
+        except botocore.exceptions.ClientError as e:
+            if 'NoSuchPublicAccessBlockConfiguration' not in str(e):
+                raise
+
+            return False
+
+        config = response['PublicAccessBlockConfiguration']
+        return (config['BlockPublicAcls'] and config['IgnorePublicAcls'] and config['BlockPublicPolicy'] and config['RestrictPublicBuckets'])
+
+    def _fix(self, options):
+        self.bucket.meta.client.put_public_access_block(
+            Bucket=self.bucket.name,
+            PublicAccessBlockConfiguration={
+                'BlockPublicAcls': True,
+                'IgnorePublicAcls': True,
+                'BlockPublicPolicy': True,
+                'RestrictPublicBuckets': True
+            }
+        )
+
+
 class LoggingCheck(Check):
     name = 'Logging'
     pass_message = 'enabled'

@@ -8,7 +8,7 @@ import botocore
 import click
 from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
-from .checks import AclCheck, PolicyCheck, LoggingCheck, VersioningCheck, EncryptionCheck
+from .checks import AclCheck, PolicyCheck, PublicAccessCheck, LoggingCheck, VersioningCheck, EncryptionCheck
 
 __version__ = '0.2.1'
 
@@ -406,6 +406,8 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
         checks.append(perform(PolicyCheck(bucket)))
 
+        checks.append(perform(PublicAccessCheck(bucket)))
+
         if not skip_logging:
             checks.append(perform(LoggingCheck(bucket, log_bucket=log_bucket, log_prefix=log_prefix)))
 
@@ -453,6 +455,13 @@ def scan_dns():
                                 print_dns_bucket('.'.join(value.split('.')[:-3]), buckets, found_buckets)
                             if 's3-website-' in value and value.endswith('.amazonaws.com'):
                                 print_dns_bucket(resource_set['Name'][:-1], buckets, found_buckets)
+
+
+@cli.command(name='block-public-access')
+@click.argument('buckets', nargs=-1)
+@click.option('--dry-run', is_flag=True, help='Dry run')
+def block_public_access(buckets, dry_run=False):
+    fix_check(PublicAccessCheck, buckets, dry_run)
 
 
 @cli.command(name='enable-logging')
