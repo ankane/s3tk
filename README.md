@@ -116,11 +116,13 @@ s3tk delete-policy my-bucket
 
 ### Block Public Access [master]
 
-Block public access
+Block public access on specific buckets
 
 ```sh
-s3tk block-public-access my-bucket
+s3tk block-public-access my-bucket my-bucket-2
 ```
+
+Use the `--dry-run` flag to test
 
 ### Enable Logging
 
