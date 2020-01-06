@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='s3tk',
-    version='0.2.1',
+    version='0.3.0',
     description='A security toolkit for Amazon S3',
     url='https://github.com/ankane/s3tk',
     author='Andrew Kane',

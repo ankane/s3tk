@@ -12,7 +12,7 @@ from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, PublicAccessCheck, LoggingCheck, VersioningCheck, EncryptionCheck
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 canned_acls = [
     {

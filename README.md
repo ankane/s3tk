@@ -37,7 +37,7 @@ Scan your buckets for:
 
 - ACL open to public
 - policy open to public
-- public access blocked [master]
+- public access blocked
 - logging enabled
 - versioning enabled
 - default encryption enabled
@@ -114,7 +114,7 @@ Delete policy
 s3tk delete-policy my-bucket
 ```
 
-### Block Public Access [master]
+### Block Public Access
 
 Block public access on specific buckets
 
