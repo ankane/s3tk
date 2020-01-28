@@ -1,4 +1,4 @@
-## 0.3.0 (unreleased)
+## 0.3.0 (2020-01-05)
 
 - Added check for public access allowed
 - Added `block-public-access` command
