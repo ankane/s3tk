@@ -196,11 +196,18 @@ class ObjectLoggingCheck(Check):
 
     def _passed(self):
         event_selectors = self.options['event_selectors']
+
         selectors = []
         selectors += event_selectors.get(('global'), [])
-        # TODO handle single-region trails
-        # need to fetch bucket region if any exist
-        # selectors += event_selectors.get(('region', region), [])
+
+        # handle single-region trails
+        if any(k for k in event_selectors.keys() if k[0] == 'region'):
+            region = self.bucket.meta.client.get_bucket_location(Bucket=self.bucket.name)['LocationConstraint']
+            # https://github.com/aws/aws-sdk-net/issues/323
+            if region is None:
+                region = 'us-east-1'
+            selectors += event_selectors.get(('region', region), [])
+
         selectors += event_selectors.get(('bucket', self.bucket.name), [])
 
         passed = any(selectors)

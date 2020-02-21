@@ -314,7 +314,8 @@ Here are the permissions needed for each command. Only include statements you ne
             "Action": [
                 "cloudtrail:ListTrails",
                 "cloudtrail:GetTrail",
-                "cloudtrail:GetEventSelectors"
+                "cloudtrail:GetEventSelectors",
+                "s3:GetBucketLocation"
             ],
             "Resource": "*"
         },
