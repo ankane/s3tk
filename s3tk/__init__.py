@@ -401,13 +401,13 @@ def fetch_event_selectors():
                             if value == 'arn:aws:s3':
                                 trail_response = client.get_trail(Name=name)['Trail']
                                 if trail_response['IsMultiRegionTrail']:
-                                    bucket = '*'
+                                    bucket = ('global')
                                 else:
-                                    bucket = '*' + trail_response['HomeRegion']
+                                    bucket = ('region', trail_response['HomeRegion'])
                                 path = ''
                             else:
                                 parts = value.split("/", 2)
-                                bucket = parts[0].replace("arn:aws:s3:::", "")
+                                bucket = ('bucket', parts[0].replace("arn:aws:s3:::", ""))
                                 path = parts[1]
                             if bucket not in event_selectors:
                                 event_selectors[bucket] = []

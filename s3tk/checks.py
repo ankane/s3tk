@@ -197,14 +197,11 @@ class ObjectLoggingCheck(Check):
     def _passed(self):
         event_selectors = self.options['event_selectors']
         selectors = []
-        if '*' in event_selectors:
-            selectors += event_selectors['*']
+        selectors += event_selectors.get(('global'), [])
         # TODO handle single-region trails
         # need to fetch bucket region if any exist
-        # if '*' + self.options.region in event_selectors:
-        #     selectors += event_selectors['*' + self.options.region]
-        if self.bucket.name in event_selectors:
-            selectors += event_selectors[self.bucket.name]
+        # selectors += event_selectors.get(('region', region), [])
+        selectors += event_selectors.get(('bucket', self.bucket.name), [])
 
         passed = any(selectors)
         if passed:
