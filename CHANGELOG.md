@@ -1,6 +1,6 @@
 ## 0.3.1 (unreleased)
 
-- Added `--object-level-logging` option to `scan` command
+- Added experimental `--object-level-logging` option to `scan` command
 
 ## 0.3.0 (2020-01-05)
 
