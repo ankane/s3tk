@@ -313,6 +313,7 @@ Here are the permissions needed for each command. Only include statements you ne
             "Effect": "Allow",
             "Action": [
                 "cloudtrail:ListTrails",
+                "cloudtrail:GetTrail",
                 "cloudtrail:GetEventSelectors"
             ],
             "Resource": "*"
