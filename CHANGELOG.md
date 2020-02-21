@@ -1,3 +1,7 @@
+## 0.3.1 (unreleased)
+
+- Added `--object-level-logging` option to `scan` command
+
 ## 0.3.0 (2020-01-05)
 
 - Added check for public access allowed

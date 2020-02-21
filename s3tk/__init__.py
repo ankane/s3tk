@@ -10,7 +10,7 @@ import botocore
 import click
 from joblib import Parallel, delayed
 from clint.textui import colored, puts, indent
-from .checks import AclCheck, PolicyCheck, PublicAccessCheck, LoggingCheck, VersioningCheck, EncryptionCheck
+from .checks import AclCheck, PolicyCheck, PublicAccessCheck, LoggingCheck, VersioningCheck, EncryptionCheck, ObjectLoggingCheck
 
 __version__ = '0.3.0'
 
@@ -398,8 +398,36 @@ def cli():
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
 @click.option('--skip-default-encryption', is_flag=True, help='Skip default encryption check')
 @click.option('--default-encryption', is_flag=True) # no op, can't hide from help until click 7 released
+@click.option('--object-level-logging', is_flag=True)
 @click.option('--sns-topic', help='Send SNS notification for failures')
-def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, skip_default_encryption=False, default_encryption=True, sns_topic=None):
+def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, skip_default_encryption=False, default_encryption=True, object_level_logging=False, sns_topic=None):
+    event_selectors = {}
+    if (object_level_logging):
+        client = boto3.client('cloudtrail')
+        paginator = client.get_paginator('list_trails')
+
+        for page in paginator.paginate():
+            for trail in page['Trails']:
+                name = trail['Name']
+                response = client.get_event_selectors(
+                    TrailName=name
+                )
+                for event_selector in response['EventSelectors']:
+                    read_write_type = event_selector['ReadWriteType']
+                    for data_resource in event_selector['DataResources']:
+                        if data_resource['Type'] == 'AWS::S3::Object':
+                            for value in data_resource['Values']:
+                                if value == 'arn:aws:s3':
+                                    bucket = '*'
+                                    path = ''
+                                else:
+                                    parts = value.split("/", 2)
+                                    bucket = parts[0].replace("arn:aws:s3:::", "")
+                                    path = parts[1]
+                                if bucket not in event_selectors:
+                                    event_selectors[bucket] = []
+                                event_selectors[bucket].append({'trail': name, 'path': path, 'read_write_type': read_write_type})
+
     checks = []
     for bucket in fetch_buckets(buckets):
         puts(bucket.name)
@@ -418,6 +446,9 @@ def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_ver
 
         if not skip_default_encryption:
             checks.append(perform(EncryptionCheck(bucket)))
+
+        if object_level_logging:
+            checks.append(perform(ObjectLoggingCheck(bucket, event_selectors=event_selectors)))
 
         puts()
 

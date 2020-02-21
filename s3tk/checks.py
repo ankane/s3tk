@@ -187,3 +187,41 @@ class EncryptionCheck(Check):
                 ]
             }
         )
+
+
+class ObjectLoggingCheck(Check):
+    name = 'Object-level logging'
+    pass_message = 'enabled'
+    fail_message = 'disabled'
+
+    def _passed(self):
+        event_selectors = self.options['event_selectors']
+        selectors = []
+        if '*' in event_selectors:
+            selectors += event_selectors['*']
+        if self.bucket.name in event_selectors:
+            selectors += event_selectors[self.bucket.name]
+
+        passed = any(selectors)
+        if passed:
+            messages = []
+            for event_selector in selectors:
+                message = event_selector['trail'] + ' ('
+
+                if event_selector['read_write_type'] == 'All':
+                    message += 'read & write'
+                elif event_selector['read_write_type'] == 'ReadOnly':
+                    message += 'read'
+                elif event_selector['read_write_type'] == 'WriteOnly':
+                    message += 'write'
+                else:
+                    message += 'unknown'
+
+                if event_selector['path'] != '':
+                    message += ' for /' + event_selector['path']
+
+                messages.append(message + ')')
+
+            self.pass_message = 'to ' + ' and '.join(messages)
+
+        return passed

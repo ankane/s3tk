@@ -64,6 +64,12 @@ Confirm correct log bucket(s) and prefix
 s3tk scan --log-bucket my-s3-logs --log-bucket other-region-logs --log-prefix "{bucket}/"
 ```
 
+Check CloudTrail object-level logging [master]
+
+```sh
+s3tk scan --object-level-logging
+```
+
 Skip logging, versioning, or default encryption
 
 ```sh
@@ -299,6 +305,15 @@ Here are the permissions needed for each command. Only include statements you ne
                 "s3:GetBucketLogging",
                 "s3:GetBucketVersioning",
                 "s3:GetEncryptionConfiguration"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ScanObjectLevelLogging",
+            "Effect": "Allow",
+            "Action": [
+                "cloudtrail:ListTrails",
+                "cloudtrail:GetEventSelectors"
             ],
             "Resource": "*"
         },
