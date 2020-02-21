@@ -385,6 +385,7 @@ def summarize(values):
 
 
 def fetch_event_selectors():
+    # TODO get trails across all regions that have buckets
     client = boto3.client('cloudtrail')
     paginator = client.get_paginator('list_trails')
 
