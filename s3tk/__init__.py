@@ -399,12 +399,11 @@ def fetch_event_selectors():
                     if data_resource['Type'] == 'AWS::S3::Object':
                         for value in data_resource['Values']:
                             if value == 'arn:aws:s3':
-                                if trail['IsMultiRegionTrail']:
+                                trail_response = client.get_trail(Name=name)['Trail']
+                                if trail_response['IsMultiRegionTrail']:
                                     bucket = '*'
                                 else:
-                                    # need to get region
-                                    region = client.get_trail(Name=name)['HomeRegion']
-                                    bucket = '*' + region
+                                    bucket = '*' + trail_response['HomeRegion']
                                 path = ''
                             else:
                                 parts = value.split("/", 2)
