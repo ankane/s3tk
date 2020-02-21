@@ -584,7 +584,7 @@ Only private uploads
 
 ## Performance
 
-For commands that do a lot of API calls (`scan-object-acl`, `reset-object-acl`, `encrypt`, and `delete-unencrypted-versions`), run s3tk on an EC2 server for minimum latency.
+For commands that iterate over bucket objects (`scan-object-acl`, `reset-object-acl`, `encrypt`, and `delete-unencrypted-versions`), run s3tk on an EC2 server for minimum latency.
 
 ## Notes
 
