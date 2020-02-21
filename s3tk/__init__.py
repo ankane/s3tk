@@ -77,7 +77,7 @@ def perform(check):
 
     with indent(2):
         if check.status == 'passed':
-            puts(colored.green('✔ ' + check.name + ' ' + check.pass_message))
+            puts(colored.green('✔ ' + check.name + ' ' + unicode_key(check.pass_message)))
         elif check.status == 'failed':
             puts(colored.red('✘ ' + check.name + ' ' + check.fail_message))
         else:
@@ -392,18 +392,19 @@ def fetch_event_selectors():
     for page in paginator.paginate():
         for trail in page['Trails']:
             name = trail['Name']
-            response = client.get_event_selectors(TrailName=name)
+            region_client = boto3.client('cloudtrail', region_name=trail['HomeRegion'])
+            response = region_client.get_event_selectors(TrailName=name)
             for event_selector in response['EventSelectors']:
                 read_write_type = event_selector['ReadWriteType']
                 for data_resource in event_selector['DataResources']:
                     if data_resource['Type'] == 'AWS::S3::Object':
                         for value in data_resource['Values']:
                             if value == 'arn:aws:s3':
-                                trail_response = client.get_trail(Name=name)['Trail']
+                                trail_response = region_client.get_trail(Name=name)['Trail']
                                 if trail_response['IsMultiRegionTrail']:
                                     bucket = ('global')
                                 else:
-                                    bucket = ('region', trail_response['HomeRegion'])
+                                    bucket = ('region', trail['HomeRegion'])
                                 path = ''
                             else:
                                 parts = value.split("/", 2)
