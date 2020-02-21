@@ -384,6 +384,35 @@ def summarize(values):
         puts(k + ': ' + str(v))
 
 
+def fetch_event_selectors():
+    client = boto3.client('cloudtrail')
+    paginator = client.get_paginator('list_trails')
+
+    event_selectors = {}
+    for page in paginator.paginate():
+        for trail in page['Trails']:
+            name = trail['Name']
+            response = client.get_event_selectors(
+                TrailName=name
+            )
+            for event_selector in response['EventSelectors']:
+                read_write_type = event_selector['ReadWriteType']
+                for data_resource in event_selector['DataResources']:
+                    if data_resource['Type'] == 'AWS::S3::Object':
+                        for value in data_resource['Values']:
+                            if value == 'arn:aws:s3':
+                                bucket = '*'
+                                path = ''
+                            else:
+                                parts = value.split("/", 2)
+                                bucket = parts[0].replace("arn:aws:s3:::", "")
+                                path = parts[1]
+                            if bucket not in event_selectors:
+                                event_selectors[bucket] = []
+                            event_selectors[bucket].append({'trail': name, 'path': path, 'read_write_type': read_write_type})
+    return event_selectors
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -401,32 +430,7 @@ def cli():
 @click.option('--object-level-logging', is_flag=True)
 @click.option('--sns-topic', help='Send SNS notification for failures')
 def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, skip_default_encryption=False, default_encryption=True, object_level_logging=False, sns_topic=None):
-    event_selectors = {}
-    if (object_level_logging):
-        client = boto3.client('cloudtrail')
-        paginator = client.get_paginator('list_trails')
-
-        for page in paginator.paginate():
-            for trail in page['Trails']:
-                name = trail['Name']
-                response = client.get_event_selectors(
-                    TrailName=name
-                )
-                for event_selector in response['EventSelectors']:
-                    read_write_type = event_selector['ReadWriteType']
-                    for data_resource in event_selector['DataResources']:
-                        if data_resource['Type'] == 'AWS::S3::Object':
-                            for value in data_resource['Values']:
-                                if value == 'arn:aws:s3':
-                                    bucket = '*'
-                                    path = ''
-                                else:
-                                    parts = value.split("/", 2)
-                                    bucket = parts[0].replace("arn:aws:s3:::", "")
-                                    path = parts[1]
-                                if bucket not in event_selectors:
-                                    event_selectors[bucket] = []
-                                event_selectors[bucket].append({'trail': name, 'path': path, 'read_write_type': read_write_type})
+    event_selectors = fetch_event_selectors() if object_level_logging else {}
 
     checks = []
     for bucket in fetch_buckets(buckets):
