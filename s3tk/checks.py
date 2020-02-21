@@ -200,6 +200,7 @@ class ObjectLoggingCheck(Check):
         if '*' in event_selectors:
             selectors += event_selectors['*']
         # TODO handle single-region trails
+        # need to fetch bucket region if any exist
         # if '*' + self.options.region in event_selectors:
         #     selectors += event_selectors['*' + self.options.region]
         if self.bucket.name in event_selectors:
