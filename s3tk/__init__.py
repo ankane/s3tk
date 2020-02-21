@@ -392,14 +392,8 @@ def fetch_event_selectors():
     for page in paginator.paginate():
         for trail in page['Trails']:
             name = trail['Name']
-            # need to determine if multi-region
-            response = client.get_trail(
-                Name=name
-            )
-            response2 = client.get_event_selectors(
-                TrailName=name
-            )
-            for event_selector in response2['EventSelectors']:
+            response = client.get_event_selectors(TrailName=name)
+            for event_selector in response['EventSelectors']:
                 read_write_type = event_selector['ReadWriteType']
                 for data_resource in event_selector['DataResources']:
                     if data_resource['Type'] == 'AWS::S3::Object':
@@ -408,7 +402,9 @@ def fetch_event_selectors():
                                 if trail['IsMultiRegionTrail']:
                                     bucket = '*'
                                 else:
-                                    bucket = '*' + trail['HomeRegion']
+                                    # need to get region
+                                    region = client.get_trail(Name=name)['HomeRegion']
+                                    bucket = '*' + region
                                 path = ''
                             else:
                                 parts = value.split("/", 2)
