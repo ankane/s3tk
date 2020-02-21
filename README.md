@@ -582,6 +582,10 @@ Only private uploads
 }
 ```
 
+## Performance
+
+For commands that do a lot of API calls (`scan-object-acl`, `reset-object-acl`, `encrypt`, and `delete-unencrypted-versions`), run s3tk on an EC2 server for minimum latency.
+
 ## Notes
 
 The `set-policy`, `block-public-access`, `enable-logging`, `enable-versioning`, and `enable-default-encryption` commands are provided for convenience. We recommend [Terraform](https://www.terraform.io/) for managing your buckets.
