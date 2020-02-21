@@ -190,7 +190,7 @@ class EncryptionCheck(Check):
 
 
 class ObjectLoggingCheck(Check):
-    name = 'Object-level logging'
+    name = 'CloudTrail object-level logging'
     pass_message = 'enabled'
     fail_message = 'disabled'
 
