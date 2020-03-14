@@ -20,7 +20,7 @@ Run:
 pip install s3tk
 ```
 
-You can use the [AWS CLI](https://github.com/aws/aws-cli) to set up your AWS credentials:
+You can use the [AWS CLI](https://github.com/aws/aws-cli) or [AWS Vault](https://github.com/99designs/aws-vault) to set up your AWS credentials:
 
 ```sh
 pip install awscli
