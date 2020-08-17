@@ -64,7 +64,7 @@ Confirm correct log bucket(s) and prefix
 s3tk scan --log-bucket my-s3-logs --log-bucket other-region-logs --log-prefix "{bucket}/"
 ```
 
-Check CloudTrail object-level logging [master, experimental]
+Check CloudTrail object-level logging [experimental]
 
 ```sh
 s3tk scan --object-level-logging

@@ -1,4 +1,4 @@
-## 0.3.1 (unreleased)
+## 0.3.1 (2020-08-17)
 
 - Added experimental `--object-level-logging` option to `scan` command
 
