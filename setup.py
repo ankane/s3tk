@@ -1,12 +1,17 @@
 from setuptools import setup
 
+with open('README.md', 'r', encoding='utf-8') as fh:
+    long_description = fh.read()
+
 setup(
     name='s3tk',
     version='0.3.1',
     description='A security toolkit for Amazon S3',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/ankane/s3tk',
     author='Andrew Kane',
-    author_email='andrew@chartkick.com',
+    author_email='andrew@ankane.org',
     license='MIT',
     packages=['s3tk'],
     scripts=['bin/s3tk'],
