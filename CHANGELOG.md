@@ -1,5 +1,6 @@
 ## 0.4.0 (unreleased)
 
+- Fixed warning with clint
 - Dropped support for Python < 3.7
 
 ## 0.3.1 (2020-08-17)
