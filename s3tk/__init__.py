@@ -66,10 +66,7 @@ def abort(message):
 
 
 def unicode_key(key):
-    if sys.version_info[0] < 3 and isinstance(key, unicode):
-        return key.encode('utf-8')
-    else:
-        return key
+    return key
 
 
 def perform(check):

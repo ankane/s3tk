@@ -1,3 +1,7 @@
+## 0.4.0 (unreleased)
+
+- Dropped support for Python < 3.7
+
 ## 0.3.1 (2020-08-17)
 
 - Added experimental `--object-level-logging` option to `scan` command
