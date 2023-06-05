@@ -51,6 +51,7 @@ canned_acls = [
 
 cached_s3 = None
 
+
 def s3():
     # memoize
     global cached_s3
@@ -273,7 +274,7 @@ def parallelize(bucket, only, _except, fn, args=(), versions=False):
     else:
         objects = bucket.objects.filter(Prefix=prefix) if prefix else bucket.objects.all()
 
-        if only and not '*' in only:
+        if only and '*' not in only:
             objects = [s3().Object(bucket, only)]
 
         return Parallel(n_jobs=24)(delayed(fn)(bucket.name, os.key, *args) for os in objects if object_matches(os.key, only, _except))
@@ -354,7 +355,7 @@ def fetch_policy(bucket):
 
 
 def print_dns_bucket(name, buckets, found_buckets):
-    if not name in found_buckets:
+    if name not in found_buckets:
         puts(name)
         with indent(2):
             if name in buckets:
@@ -431,7 +432,7 @@ def cli():
 @click.option('--skip-logging', is_flag=True, help='Skip logging check')
 @click.option('--skip-versioning', is_flag=True, help='Skip versioning check')
 @click.option('--skip-default-encryption', is_flag=True, help='Skip default encryption check')
-@click.option('--default-encryption', is_flag=True) # no op, can't hide from help until click 7 released
+@click.option('--default-encryption', is_flag=True)  # no op, can't hide from help until click 7 released
 @click.option('--object-level-logging', is_flag=True)
 @click.option('--sns-topic', help='Send SNS notification for failures')
 def scan(buckets, log_bucket=None, log_prefix=None, skip_logging=False, skip_versioning=False, skip_default_encryption=False, default_encryption=True, object_level_logging=False, sns_topic=None):
