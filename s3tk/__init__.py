@@ -5,12 +5,17 @@ import os.path
 import json
 import fnmatch
 from collections import Counter, OrderedDict
+import warnings
 import boto3
 import botocore
 import click
 from joblib import Parallel, delayed
-from clint.textui import colored, puts, indent
 from .checks import AclCheck, PolicyCheck, PublicAccessCheck, LoggingCheck, VersioningCheck, EncryptionCheck, ObjectLoggingCheck
+
+# fix for https://github.com/kennethreitz-archive/clint/issues/185
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from clint.textui import colored, puts, indent
 
 __version__ = '0.3.1'
 
