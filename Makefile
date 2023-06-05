@@ -1,12 +1,11 @@
-test:
-	py.test tests
+lint:
+	pycodestyle . --ignore=E501
 
-install:
-	pip install -r requirements.txt
-
-publish:
-	rm -fr build dist s3tk.egg-info
-	python setup.py bdist_wheel --universal
+publish: clean
+	python3 setup.py bdist_wheel --universal
 	ls dist
 	# twine upload dist/*
-	rm -fr build dist s3tk.egg-info
+	make clean
+
+clean:
+	rm -rf .pytest_cache build dist s3tk.egg-info
