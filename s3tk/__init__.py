@@ -15,7 +15,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from clint.textui import colored, puts, indent
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 canned_acls = [
     {
