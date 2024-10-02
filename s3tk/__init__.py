@@ -705,3 +705,12 @@ def update_policy(bucket, encryption=None, dry_run=False):
 def delete_policy(bucket):
     s3().Bucket(bucket).Policy().delete()
     puts('Policy deleted')
+
+
+def main():
+    try:
+        cli()
+    except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+        abort(str(e))
+    except KeyboardInterrupt:
+        sys.exit(1)

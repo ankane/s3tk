@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s3tk"
+version = "0.4.0"
+description = "A security toolkit for Amazon S3"
+readme = "README.md"
+authors = [
+    {name = "Andrew Kane", email = "andrew@ankane.org"}
+]
+license = {text = "BSD-3-Clause"}
+requires-python = ">= 3.8"
+dependencies = [
+    "boto3>=1.9.46",
+    "botocore>=1.12.46",
+    "clint",
+    "click",
+    "joblib"
+]
+
+[project.urls]
+Homepage = "https://github.com/ankane/s3tk"
+
+[project.scripts]
+s3tk = "s3tk:main"
