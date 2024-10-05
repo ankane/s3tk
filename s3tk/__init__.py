@@ -1,5 +1,4 @@
 import sys
-import os.path
 import json
 import fnmatch
 from collections import Counter, OrderedDict
@@ -528,7 +527,7 @@ def enable_versioning(buckets, dry_run=False):
 @cli.command(name='enable-default-encryption')
 @click.argument('buckets', nargs=-1)
 @click.option('--dry-run', is_flag=True, help='Dry run')
-def enable_versioning(buckets, dry_run=False):
+def enable_default_encryption(buckets, dry_run=False):
     fix_check(EncryptionCheck, buckets, dry_run)
 
 
