@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Andrew Kane", email = "andrew@ankane.org"}
 ]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 requires-python = ">= 3.8"
 dependencies = [
     "boto3>=1.9.46",
