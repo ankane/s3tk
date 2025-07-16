@@ -1,3 +1,7 @@
+## 0.5.0 (unreleased)
+
+- Dropped support for Python < 3.9
+
 ## 0.4.0 (2023-07-23)
 
 - Fixed warning with clint
