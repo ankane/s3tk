@@ -429,123 +429,37 @@ Here are the permissions needed for each command. Only include statements you ne
 
 ## Access Logs
 
-[Amazon Athena](https://aws.amazon.com/athena/) is great for querying S3 logs. Create a table (thanks to [this post](http://aws.mannem.me/?p=1462) for the table structure) with:
-
-```sql
-CREATE EXTERNAL TABLE my_bucket (
-    bucket_owner string,
-    bucket string,
-    time string,
-    remote_ip string,
-    requester string,
-    request_id string,
-    operation string,
-    key string,
-    request_verb string,
-    request_url string,
-    request_proto string,
-    status_code string,
-    error_code string,
-    bytes_sent string,
-    object_size string,
-    total_time string,
-    turn_around_time string,
-    referrer string,
-    user_agent string,
-    version_id string
-)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
-WITH SERDEPROPERTIES (
-    'serialization.format' = '1',
-    'input.regex' = '([^ ]*) ([^ ]*) \\[(.*?)\\] ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) \\\"([^ ]*) ([^ ]*) (- |[^ ]*)\\\" (-|[0-9]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) (\"[^\"]*\\") ([^ ]*)$'
-) LOCATION 's3://my-s3-logs/my-bucket/';
-```
-
-Change the last line to point to your log bucket (and prefix) and query away
+[Amazon Athena](https://aws.amazon.com/athena/) is great for querying S3 logs. [Create a table](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-s3-access-logs-to-identify-requests.html#querying-s3-access-logs-for-requests) and query away:
 
 ```sql
 SELECT
-    date_parse(time, '%d/%b/%Y:%H:%i:%S +0000') AS time,
-    request_url,
-    remote_ip,
-    user_agent
+    parse_datetime(requestdatetime, 'dd/MMM/yyyy:HH:mm:ss Z') AS time,
+    key,
+    remoteip,
+    useragent
 FROM
-    my_bucket
+    s3_access_logs_db.mybucket_logs
 WHERE
     requester = '-'
-    AND status_code LIKE '2%'
-    AND request_url LIKE '/some-keys%'
+    AND httpstatus LIKE '2%'
+    AND key LIKE 'some-keys%'
 ORDER BY 1
 ```
 
 ## CloudTrail Logs
 
-Amazon Athena is also great for querying CloudTrail logs. Create a table (thanks to [this post](https://www.1strategy.com/blog/2017/07/25/auditing-aws-activity-with-cloudtrail-and-athena/) for the table structure) with:
-
-```sql
-CREATE EXTERNAL TABLE cloudtrail_logs (
-    eventversion STRING,
-    userIdentity STRUCT<
-        type:STRING,
-        principalid:STRING,
-        arn:STRING,
-        accountid:STRING,
-        invokedby:STRING,
-        accesskeyid:STRING,
-        userName:String,
-        sessioncontext:STRUCT<
-            attributes:STRUCT<
-                mfaauthenticated:STRING,
-                creationdate:STRING>,
-            sessionIssuer:STRUCT<
-                type:STRING,
-                principalId:STRING,
-                arn:STRING,
-                accountId:STRING,
-                userName:STRING>>>,
-    eventTime STRING,
-    eventSource STRING,
-    eventName STRING,
-    awsRegion STRING,
-    sourceIpAddress STRING,
-    userAgent STRING,
-    errorCode STRING,
-    errorMessage STRING,
-    requestId  STRING,
-    eventId  STRING,
-    resources ARRAY<STRUCT<
-        ARN:STRING,
-        accountId:STRING,
-        type:STRING>>,
-    eventType STRING,
-    apiVersion  STRING,
-    readOnly BOOLEAN,
-    recipientAccountId STRING,
-    sharedEventID STRING,
-    vpcEndpointId STRING,
-    requestParameters STRING,
-    responseElements STRING,
-    additionalEventData STRING,
-    serviceEventDetails STRING
-)
-ROW FORMAT SERDE 'com.amazon.emr.hive.serde.CloudTrailSerde'
-STORED  AS INPUTFORMAT 'com.amazon.emr.cloudtrail.CloudTrailInputFormat'
-OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION  's3://my-cloudtrail-logs/'
-```
-
-Change the last line to point to your CloudTrail log bucket and query away
+Amazon Athena is also great for querying CloudTrail logs. [Create a table](https://docs.aws.amazon.com/athena/latest/ug/create-cloudtrail-table.html) and query away:
 
 ```sql
 SELECT
-    eventTime,
-    eventName,
-    userIdentity.userName,
-    requestParameters
+    eventtime,
+    eventname,
+    useridentity.username,
+    requestparameters
 FROM
     cloudtrail_logs
 WHERE
-    eventName LIKE '%Bucket%'
+    eventname LIKE '%Bucket%'
 ORDER BY 1
 ```
 
