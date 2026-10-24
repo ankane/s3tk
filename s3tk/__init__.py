@@ -247,10 +247,10 @@ def object_matches(key, only, _except):
     match = True
 
     if only:
-        match = fnmatch.fnmatch(key, only)
+        match = fnmatch.fnmatchcase(key, only)
 
     if _except and match:
-        match = not fnmatch.fnmatch(key, _except)
+        match = not fnmatch.fnmatchcase(key, _except)
 
     return match
 

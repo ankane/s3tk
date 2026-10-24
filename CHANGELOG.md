@@ -1,3 +1,7 @@
+## 0.5.1 (unreleased)
+
+- Fixed case sensitivity for `--only` and `--except` options on Windows
+
 ## 0.5.0 (2025-12-04)
 
 - Dropped support for Python < 3.10
