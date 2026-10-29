@@ -6,6 +6,8 @@ A security toolkit for Amazon S3
 
 :tangerine: Battle-tested at [Instacart](https://www.instacart.com/opensource)
 
+[![Build Status](https://github.com/ankane/s3tk/actions/workflows/build.yml/badge.svg)](https://github.com/ankane/s3tk/actions)
+
 ## Installation
 
 Run:
