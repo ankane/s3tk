@@ -1,4 +1,4 @@
-## 0.5.1 (unreleased)
+## 0.5.1 (2026-10-28)
 
 - Fixed case sensitivity for `--only` and `--except` options on Windows
 
