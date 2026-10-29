@@ -9,4 +9,4 @@ jobs:
         with:
           python-version: 3.15
       - run: pip install .
-      - run: s3tk
+      - run: s3tk --version
